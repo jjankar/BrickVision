@@ -94,4 +94,7 @@ buildNumber.properties
 */cmake_install.cmake
 .DS_Store
 
+###Ant###
+build/
+build.xml
 # End of https://www.gitignore.io/api/java,eclipse,opencv,maven
