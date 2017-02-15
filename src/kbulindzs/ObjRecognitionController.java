@@ -1,11 +1,13 @@
 package kbulindzs;
 
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +18,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -144,7 +147,7 @@ public class ObjRecognitionController
 				};
 				
 				this.timer = Executors.newSingleThreadScheduledExecutor();
-				this.timer.scheduleAtFixedRate(frameGrabber, 0, 33, TimeUnit.MILLISECONDS);
+				this.timer.scheduleAtFixedRate(frameGrabber, 0, 1000, TimeUnit.MILLISECONDS);
 				
 			}
 		}
@@ -225,9 +228,8 @@ public class ObjRecognitionController
 			//show partial output
 			this.onFXThread(this.morphImage.imageProperty(), this.mat2Image(morphOutput));
 			
-			
 			//find tennis ball(s) contours and show them
-			frame = this.findAndDrawBalls(morphOutput, frame);
+			frame = this.findCircles(frame);
 			
 			//convert the Mat object (OpenCV) to Image (JavaFX)
 			imageToShow = mat2Image(frame);
@@ -356,12 +358,60 @@ public class ObjRecognitionController
 				Imgproc.drawContours(frame, contours, idx, new Scalar(250, 0, 0));
 			}
 		}
-		
 		return frame;
 	}
 	
 	//TODO change method to count circles
-	//private Mat findCircles ()
+	
+	private Mat findCircles(Mat frame) {
+		
+		Mat gray = new Mat();
+		
+		//make frame 8-bit single-channel, write from frame to gray
+		Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
+		Imgproc.blur(gray, gray, new Size(3, 3));
+		
+		//find edges, write from gray to gray
+		//best ratio 2 or 3
+		int lowThreshold = 40;
+		int ratio = 3;
+		Imgproc.Canny(gray, gray, lowThreshold, lowThreshold * ratio);
+		
+		Mat circles = new Mat();
+		
+		//vector to count all circles
+		Vector<Mat> circlesList = new Vector<Mat>();
+		
+		//find circles
+		Imgproc.HoughCircles(gray, circles, Imgproc.CV_HOUGH_GRADIENT, 2, frame.rows()/16, 100, 100, 0, 200);
+		
+		//coordinates of circle center and circle radius
+		double x = 0.0;
+		double y = 0.0;
+		int r = 0;
+		
+		for (int i = 0; i < circles.rows(); i++) {
+			double data[] = circles.get(i, 0);
+			if (data == null)
+				break;
+			
+			for (int j = 0; j < data.length; j++) {
+				x = data[0];
+				y = data[1];
+				r = (int) data[2];
+			}
+			Point center = new Point(x, y);
+			//draw circle center
+			Imgproc.circle(frame, center, 3, new Scalar(0, 255, 0), -1, 8, 0);
+			//draw circle outline
+			Imgproc.circle(frame, center, r, new Scalar(0, 0, 255), 3, 8, 0);
+			
+			circlesList.add(circles);
+		}
+		System.out.println(circlesList.size());
+		return frame;
+	}
+	
 	
 	
 	/**
