@@ -55,10 +55,9 @@ public class ImgTools {
 	
 	public Mat removeBackGround (Mat img, Mat backGround){
 		
-		Mat div = new Mat();
-		Core.divide(img, backGround, div);
+		Core.subtract (backGround, img, img);
 		
-		return div;
+		return img;
 		
 	}
 
