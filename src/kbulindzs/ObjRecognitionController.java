@@ -125,7 +125,7 @@ public class ObjRecognitionController
 				};
 				
 				this.timer = Executors.newSingleThreadScheduledExecutor();
-				this.timer.scheduleAtFixedRate(frameGrabber, 0, 33, TimeUnit.MILLISECONDS);
+				this.timer.scheduleAtFixedRate(frameGrabber, 0, 500, TimeUnit.MILLISECONDS);
 				
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
@@ -178,7 +178,6 @@ public class ObjRecognitionController
 	
 	
 	private Image grabImg() {
-		//TODO image "/home/student/workspace/circles/circles3.png"
 		Mat frame = new Mat();
 		Image imageToShow = null;
 		
@@ -228,7 +227,7 @@ public class ObjRecognitionController
 			//show partial output
 			this.onFXThread(this.morphImage.imageProperty(), this.mat2Image(morphOutput));
 			
-			//find tennis ball(s) contours and show them
+			//find circles and show them
 			frame = this.findCircles(frame);
 			
 			//convert the Mat object (OpenCV) to Image (JavaFX)
@@ -308,9 +307,8 @@ public class ObjRecognitionController
 					// show the partial output
 					this.onFXThread(this.morphImage.imageProperty(), this.mat2Image(morphOutput));
 					
-					//TODO count circles
-					// find the tennis ball(s) contours and show them
-					frame = this.findAndDrawBalls(morphOutput, frame);
+					//count circles and show them
+					frame = this.findCircles(frame);
 					
 					// convert the Mat object (OpenCV) to Image (JavaFX)
 					imageToShow = mat2Image(frame);
@@ -329,9 +327,6 @@ public class ObjRecognitionController
 	}
 	
 	/**
-	 * Given a binary image containing one or more closed surfaces, use it as a
-	 * mask to find and highlight the objects contours
-	 * 
 	 * @param maskedImage
 	 *            the binary image to be used as a mask
 	 * @param frame
@@ -339,29 +334,6 @@ public class ObjRecognitionController
 	 *            objects contours
 	 * @return the {@link Mat} image with the objects contours framed
 	 */
-	
-	private Mat findAndDrawBalls(Mat maskedImage, Mat frame)
-	{
-		// init
-		List<MatOfPoint> contours = new ArrayList<>();
-		Mat hierarchy = new Mat();
-		
-		// find contours
-		Imgproc.findContours(maskedImage, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
-		
-		// if any contour exist...
-		if (hierarchy.size().height > 0 && hierarchy.size().width > 0)
-		{
-			// for each contour, display it in blue
-			for (int idx = 0; idx >= 0; idx = (int) hierarchy.get(0, idx)[0])
-			{
-				Imgproc.drawContours(frame, contours, idx, new Scalar(250, 0, 0));
-			}
-		}
-		return frame;
-	}
-	
-	//TODO change method to count circles
 	
 	private Mat findCircles(Mat frame) {
 		
@@ -373,9 +345,10 @@ public class ObjRecognitionController
 		
 		//find edges, write from gray to gray
 		//best ratio 2 or 3
-		int lowThreshold = 40;
+		int lowThreshold = 50;
 		int ratio = 3;
-		Imgproc.Canny(gray, gray, lowThreshold, lowThreshold * ratio);
+		int highThreshold = lowThreshold * ratio;
+		Imgproc.Canny(gray, gray, lowThreshold, highThreshold);
 		
 		Mat circles = new Mat();
 		
@@ -383,15 +356,15 @@ public class ObjRecognitionController
 		Vector<Mat> circlesList = new Vector<Mat>();
 		
 		//find circles
-		Imgproc.HoughCircles(gray, circles, Imgproc.CV_HOUGH_GRADIENT, 2, frame.rows()/16, 100, 100, 0, 200);
+		Imgproc.HoughCircles(gray, circles, Imgproc.CV_HOUGH_GRADIENT, 2, 40, highThreshold, 60, 0, 60);
 		
 		//coordinates of circle center and circle radius
 		double x = 0.0;
 		double y = 0.0;
 		int r = 0;
 		
-		for (int i = 0; i < circles.rows(); i++) {
-			double data[] = circles.get(i, 0);
+		for (int i = 0; i < circles.cols(); i++) {
+			double data[] = circles.get(0, i);
 			if (data == null)
 				break;
 			
@@ -402,9 +375,13 @@ public class ObjRecognitionController
 			}
 			Point center = new Point(x, y);
 			//draw circle center
-			Imgproc.circle(frame, center, 3, new Scalar(0, 255, 0), -1, 8, 0);
+			Imgproc.circle(frame, center, 3, new Scalar(0, 255, 0), -1, 1, 0);
 			//draw circle outline
-			Imgproc.circle(frame, center, r, new Scalar(0, 0, 255), 3, 8, 0);
+			Imgproc.circle(frame, center, r, new Scalar(0, 0, 255), 1, 1, 0);
+			
+			System.out.println("x: " + x);
+			System.out.println("y: " + y);
+			System.out.println("r: " + r);
 			
 			circlesList.add(circles);
 		}
