@@ -66,15 +66,16 @@ public class ImgTools {
 	
 	public BufferedImage makeBinaryImg(BufferedImage img){
 		
-		int iw = 0;
-		int ih = 0;
+		int iw = img.getWidth();
+		int ih = img.getHeight();
 		BufferedImage binary = new BufferedImage(iw, ih, BufferedImage.TYPE_BYTE_BINARY);
+		binary = img;
        /* Graphics biG = binary.getGraphics();
         Image gray = null;
 		biG.drawImage(gray, 0, 0, null);
         biG.dispose();*/
 		
-		return null;
+		return binary;
 		
 	}
 }
