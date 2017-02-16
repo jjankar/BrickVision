@@ -55,6 +55,11 @@ public class ImgTools {
 	
 	
 	
+	/**
+	 * @param img
+	 * @param backGround
+	 * @return
+	 */
 	public Mat removeBackGround (Mat img, Mat backGround){
 		
 		Core.subtract (backGround, img, img);
@@ -64,16 +69,20 @@ public class ImgTools {
 	}
 	
 	
+	/**
+	 * @param img
+	 * @return
+	 */
 	public BufferedImage makeBinaryImg(BufferedImage img){
 		
 		int iw = img.getWidth();
 		int ih = img.getHeight();
 		BufferedImage binary = new BufferedImage(iw, ih, BufferedImage.TYPE_BYTE_BINARY);
 		binary = img;
-       /* Graphics biG = binary.getGraphics();
+        Graphics biG = binary.getGraphics();
         Image gray = null;
 		biG.drawImage(gray, 0, 0, null);
-        biG.dispose();*/
+        biG.dispose();
 		
 		return binary;
 		

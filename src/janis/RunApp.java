@@ -25,9 +25,10 @@ public class RunApp {
 		Imgproc.medianBlur(matBack, matBack, 3);
 		matImg = tool.removeBackGround(matImg, matBack);
 		BufferedImage image = tool.makeBuffImageFromMat(matImg);
+		image = tool.makeBinaryImg(image);
 		File ouptut = new File("YY.jpg");
         ImageIO.write(image, "jpg", ouptut);
-        System.out.println("Proces is done!");
+        System.out.println("Process is done!");
 	}
 
 }
