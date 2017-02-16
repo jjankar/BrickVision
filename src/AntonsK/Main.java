@@ -27,8 +27,7 @@ public class Main {
          Mat mat1 = new Mat(image.getHeight(),image.getWidth(),CvType.CV_8UC1);
          Imgproc.cvtColor(mat, mat1, Imgproc.COLOR_RGB2GRAY);
          
-         
-                       //detectMultiScale(mat1, MatOfRect);
+                        //detectMultiScale(mat1, MatOfRect);
          
          byte[] data1 = new byte[mat1.rows() * mat1.cols() * (int)(mat1.elemSize())];
          mat1.get(0, 0, data1);
