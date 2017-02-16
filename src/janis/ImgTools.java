@@ -1,6 +1,8 @@
 package janis;
 
 
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
@@ -60,5 +62,19 @@ public class ImgTools {
 		return img;
 		
 	}
-
+	
+	
+	public BufferedImage makeBinaryImg(BufferedImage img){
+		
+		int iw = 0;
+		int ih = 0;
+		BufferedImage binary = new BufferedImage(iw, ih, BufferedImage.TYPE_BYTE_BINARY);
+       /* Graphics biG = binary.getGraphics();
+        Image gray = null;
+		biG.drawImage(gray, 0, 0, null);
+        biG.dispose();*/
+		
+		return null;
+		
+	}
 }
