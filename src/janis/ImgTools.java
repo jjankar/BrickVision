@@ -68,6 +68,15 @@ public class ImgTools {
 		
 	}
 	
+	public Mat makeMatFromBuffImg(BufferedImage image){
+		
+		byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        Mat matImg = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
+        matImg.put(0, 0, data);
+        
+		return matImg;
+		
+	}
 	
 	/**
 	 * @param img
@@ -75,16 +84,9 @@ public class ImgTools {
 	 */
 	public BufferedImage makeBinaryImg(BufferedImage img){
 		
-		int iw = img.getWidth();
-		int ih = img.getHeight();
-		BufferedImage binary = new BufferedImage(iw, ih, BufferedImage.TYPE_BYTE_BINARY);
-		binary = img;
-        Graphics biG = binary.getGraphics();
-        Image gray = null;
-		biG.drawImage(gray, 0, 0, null);
-        biG.dispose();
 		
-		return binary;
+		
+		return img;
 		
 	}
 }
