@@ -97,4 +97,9 @@ buildNumber.properties
 ###Ant###
 build/
 build.xml
+
+###img###
+*.jpeg
+*.jpg
+*.png
 # End of https://www.gitignore.io/api/java,eclipse,opencv,maven
