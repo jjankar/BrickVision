@@ -43,7 +43,7 @@ public class MatInOut {
          System.out.println("Rows: "+mat1.rows());
          
          
-         for (int row = 0; row < mat1.rows(); row++) {
+         /*for (int row = 0; row < mat1.rows(); row++) {
 			for (int col = 0; col < mat1.cols(); col++) {
 				double [] arry =mat1.get(row, col);
 				
@@ -53,15 +53,15 @@ public class MatInOut {
 				}
 				
 			} 
-		}
+		}*/
          
-        /* byte[] data1 = new byte[mat1.rows() * mat1.cols() * (int)(mat1.elemSize())];
+         byte[] data1 = new byte[mat1.rows() * mat1.cols() * (int)(mat1.elemSize())];
          mat1.get(0, 0, data1);
          BufferedImage image1 = new BufferedImage(mat1.cols(),mat1.rows(), BufferedImage.TYPE_BYTE_GRAY);
          image1.getRaster().setDataElements(0, 0, mat1.cols(), mat1.rows(), data1);
 
          File ouptut = new File("YY.jpeg");
-         ImageIO.write(image1, "jpeg", ouptut);*/
+         ImageIO.write(image1, "jpeg", ouptut);
          
       } catch (Exception e) {
          System.out.println("Error: " + e.getMessage());
