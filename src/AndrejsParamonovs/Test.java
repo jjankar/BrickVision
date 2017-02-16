@@ -60,7 +60,7 @@ import org.opencv.imgproc.Imgproc;
 
 public class Test {
    public static void main( String[] args ) { 
-   System.out.println("Hi!");
+   System.out.println("Hi! OK");
       try {
          System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
          File input = new File("dice.jpeg");
