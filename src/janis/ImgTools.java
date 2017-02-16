@@ -1,6 +1,8 @@
 package janis;
 
 
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
@@ -53,6 +55,11 @@ public class ImgTools {
 	
 	
 	
+	/**
+	 * @param img
+	 * @param backGround
+	 * @return
+	 */
 	public Mat removeBackGround (Mat img, Mat backGround){
 		
 		Core.subtract (backGround, img, img);
@@ -60,5 +67,26 @@ public class ImgTools {
 		return img;
 		
 	}
-
+	
+	public Mat makeMatFromBuffImg(BufferedImage image){
+		
+		byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        Mat matImg = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
+        matImg.put(0, 0, data);
+        
+		return matImg;
+		
+	}
+	
+	/**
+	 * @param img
+	 * @return
+	 */
+	public BufferedImage makeBinaryImg(BufferedImage img){
+		
+		
+		
+		return img;
+		
+	}
 }
