@@ -1,4 +1,4 @@
-package kbulindzs;
+package AntonsK;
 
 import org.opencv.core.Core;
 
@@ -33,7 +33,7 @@ public class ObjRecognition extends Application
 			// set a whitesmoke background
 			root.setStyle("-fx-background-color: whitesmoke;");
 			// create and style a scene
-			Scene scene = new Scene(root, 1000, 800);
+			Scene scene = new Scene(root, 800, 600);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			// create the stage with the given title and the previously created
 			// scene
