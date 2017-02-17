@@ -100,8 +100,7 @@ public class ImgTools {
 		Mat mat = this.makeMatFromBuffImgGrey(img);
 		//cvtColor(imageMat, grayscaleMat, CV_RGB2GRAY);
 		//threshold(grayscaleMat, binaryMat, 100, 255, CV_THRESH_BINARY);
-		Imgproc.threshold(mat, mat, 1, 255, 0);
-		
+		Imgproc.threshold(mat, mat, 1, 255, 0);		
 		//TODO need to add
 		return this.makeBuffImageFromMat(mat);
 		

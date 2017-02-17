@@ -8,6 +8,7 @@ import javax.imageio.ImageIO;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class RunApp {
@@ -21,8 +22,8 @@ public class RunApp {
 		
 		Mat matImg = tool.makeMat("objects.jpg");
 		Mat matBack = tool.makeMat("background.jpg");
-		Imgproc.medianBlur(matImg, matImg, 3);
-		Imgproc.medianBlur(matBack, matBack, 3);
+		Imgproc.blur(matImg, matImg, new Size(7,7));
+		Imgproc.blur(matBack, matBack, new Size(7,7));
 		//--------------------------------------------------------------------------//
 		//removing noise
 		Imgproc.cvtColor( matImg, matImg, Imgproc.COLOR_RGB2GRAY);
@@ -32,15 +33,33 @@ public class RunApp {
 		matImg = tool.removeBackGround(matImg, matBack);
 		//-------------------------------------------------------------------------//
 		//remove background
+		Imgproc.threshold(matImg, matImg, 1, 255, 0);
+		//------------------------------------------------------------------------//
 		BufferedImage image = tool.makeBuffImageFromMat(matImg);
 		image = tool.makeBinaryImg(image);
 		//-------------------------------------------------------------------------//
 		//make binary image
-		File ouptut = new File("YY.jpg");
+		File ouptut = new File("GG.jpg");
         ImageIO.write(image, "jpg", ouptut);
-        System.out.println("Binary image is created!");
-        //-----------------------------------------------------------------------------//
-        //end of binary
+		//binary matrice
+		 System.out.println("Binary image is created!");
+	    //-----------------------------------------------------------------------------//
+	    //end of binary
+		Mat matLeb = new Mat();
+		int num = Imgproc.connectedComponents(matImg, matLeb);
+		System.out.println("Labeled Matrice is created!");
+		System.out.println(num);
+		
+		//-------------------------------------------------------------------------------//
+		
+		
+		
+		
+        
+        
+        
+       
+        
         
         
         
