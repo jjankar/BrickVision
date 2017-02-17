@@ -23,15 +23,28 @@ public class RunApp {
 		Mat matBack = tool.makeMat("background.jpg");
 		Imgproc.medianBlur(matImg, matImg, 3);
 		Imgproc.medianBlur(matBack, matBack, 3);
+		//--------------------------------------------------------------------------//
+		//removing noise
 		Imgproc.cvtColor( matImg, matImg, Imgproc.COLOR_RGB2GRAY);
 		Imgproc.cvtColor( matBack, matBack, Imgproc.COLOR_RGB2GRAY);
+		//-------------------------------------------------------------------------//
+		//make gray scale
 		matImg = tool.removeBackGround(matImg, matBack);
-		
+		//-------------------------------------------------------------------------//
+		//remove background
 		BufferedImage image = tool.makeBuffImageFromMat(matImg);
 		image = tool.makeBinaryImg(image);
+		//-------------------------------------------------------------------------//
+		//make binary image
 		File ouptut = new File("YY.jpg");
         ImageIO.write(image, "jpg", ouptut);
-        System.out.println("Process is done!");
+        System.out.println("Binary image is created!");
+        //-----------------------------------------------------------------------------//
+        //end of binary
+        
+        
+        
+        
 	}
 
 }
