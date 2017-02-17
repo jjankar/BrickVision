@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -54,28 +55,28 @@ public class ObjRecognitionController
 	// the FXML area for showing the current frame
 	@FXML
 	private ImageView originalFrame;
-	// the FXML area for showing the mask
+	
+	// the FXML area for showing the output of the canny operations
 	@FXML
-	private ImageView maskImage;
-	// the FXML area for showing the output of the morphological operations
+	private ImageView cannyImage;
+	// FXML slider for parameters
 	@FXML
-	private ImageView morphImage;
-	// FXML slider for setting HSV ranges
+	private Slider dpSlider;
 	@FXML
-	private Slider hueStart;
+	private Slider minDistSlider;
 	@FXML
-	private Slider hueStop;
+	private Slider lowThresholdSlider;
 	@FXML
-	private Slider saturationStart;
+	private Slider highThresholdSlider;
 	@FXML
-	private Slider saturationStop;
+	private Slider accumulatorSlider;
 	@FXML
-	private Slider valueStart;
+	private Slider minRadiusSlider;
 	@FXML
-	private Slider valueStop;
+	private Slider maxRadiusSlider;
 	// FXML label to show the current values set with the sliders
 	@FXML
-	private Label hsvCurrentValues;
+	private Label parameterValues;
 	
 	// a timer for acquiring the video stream
 	private ScheduledExecutorService timer;
@@ -85,7 +86,7 @@ public class ObjRecognitionController
 	private boolean cameraActive;
 	
 	// property for object binding
-	private ObjectProperty<String> hsvValuesProp;
+	private ObjectProperty<String> parameterValuesProp;
 		
 	/**
 	 * The action triggered by pushing the button on the GUI
@@ -95,13 +96,12 @@ public class ObjRecognitionController
 	{
 		// bind a text property with the string containing the current range of
 		// HSV values for object detection
-		hsvValuesProp = new SimpleObjectProperty<>();
-		this.hsvCurrentValues.textProperty().bind(hsvValuesProp);
+		parameterValuesProp = new SimpleObjectProperty<>();
+		this.parameterValues.textProperty().bind(parameterValuesProp);
 				
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.originalFrame, 400);
-		this.imageViewProperties(this.maskImage, 200);
-		this.imageViewProperties(this.morphImage, 200);
+		this.imageViewProperties(this.cannyImage, 400);
 		
 		if (!this.cameraActive)
 		{
@@ -182,50 +182,21 @@ public class ObjRecognitionController
 		Image imageToShow = null;
 		
 		try {
-			frame = Imgcodecs.imread("/home/student/workspace/circles/dice11.png");
+			frame = Imgcodecs.imread("/home/student/workspace/circles/dice4.png");
 			
-			Mat blurredImage = new Mat();
-			Mat hsvImage = new Mat();
-			Mat mask = new Mat();
-			Mat morphOutput = new Mat();
+			//resize image with same aspect ratio
+			int originWidth = frame.width();
+			int originHeight = frame.height();
 			
-			//remove some noise
-			Imgproc.blur(frame, blurredImage, new Size(7, 7));
-			
-			//convert frame to HSV
-			Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
-			
-			//get thresholding values from UI
-			//H range 0-180, S and V range 0-255
-			Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
-					this.valueStart.getValue());
-			Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(),
-					this.valueStop.getValue());
-			
-			// show the current selected HSV range
-			String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0]
-					+ "\tSaturation range: " + minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: "
-					+ minValues.val[2] + "-" + maxValues.val[2];
-			this.onFXThread(this.hsvValuesProp, valuesToPrint);
-			
-			//threshold HSV image to select tennis balls
-			Core.inRange(hsvImage, minValues, maxValues, mask);
-			//show partial output
-			this.onFXThread(this.maskImage.imageProperty(), this.mat2Image(mask));
-			
-			//morphological operators
-			//dilate with large element, erode with small
-			Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
-			Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
-			
-			Imgproc.erode(mask, morphOutput, erodeElement);
-			Imgproc.erode(mask, morphOutput, erodeElement);
-			
-			Imgproc.dilate(mask, morphOutput, dilateElement);
-			Imgproc.dilate(mask, morphOutput, dilateElement);
-			
-			//show partial output
-			this.onFXThread(this.morphImage.imageProperty(), this.mat2Image(morphOutput));
+			if (originWidth > 640 && originHeight > 480){
+				if (originWidth > originHeight || originWidth == originHeight) {
+					Imgproc.resize(frame, frame, new Size(640, 640*originHeight/originWidth));
+				}
+				else if (originWidth < originHeight) {
+					
+					Imgproc.resize(frame, frame, new Size(480*originWidth/originHeight, 480));
+				}
+			}
 			
 			//find circles and show them
 			frame = this.findCircles(frame);
@@ -263,49 +234,6 @@ public class ObjRecognitionController
 				// if the frame is not empty, process it
 				if (!frame.empty())
 				{
-					// init
-					Mat blurredImage = new Mat();
-					Mat hsvImage = new Mat();
-					Mat mask = new Mat();
-					Mat morphOutput = new Mat();
-					
-					// remove some noise
-					Imgproc.blur(frame, blurredImage, new Size(7, 7));
-					
-					// convert the frame to HSV
-					Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
-					
-					// get thresholding values from the UI
-					// remember: H ranges 0-180, S and V range 0-255
-					Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
-							this.valueStart.getValue());
-					Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(),
-							this.valueStop.getValue());
-					
-					// show the current selected HSV range
-					String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0]
-							+ "\tSaturation range: " + minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: "
-							+ minValues.val[2] + "-" + maxValues.val[2];
-					this.onFXThread(this.hsvValuesProp, valuesToPrint);
-					
-					// threshold HSV image to select tennis balls
-					Core.inRange(hsvImage, minValues, maxValues, mask);
-					// show the partial output
-					this.onFXThread(this.maskImage.imageProperty(), this.mat2Image(mask));
-					
-					// morphological operators
-					// dilate with large element, erode with small ones
-					Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
-					Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
-					
-					Imgproc.erode(mask, morphOutput, erodeElement);
-					Imgproc.erode(mask, morphOutput, erodeElement);
-					
-					Imgproc.dilate(mask, morphOutput, dilateElement);
-					Imgproc.dilate(mask, morphOutput, dilateElement);
-					
-					// show the partial output
-					this.onFXThread(this.morphImage.imageProperty(), this.mat2Image(morphOutput));
 					
 					//count circles and show them
 					frame = this.findCircles(frame);
@@ -338,28 +266,35 @@ public class ObjRecognitionController
 	private Mat findCircles(Mat frame) {
 		
 		Mat gray = new Mat();
+		Mat circles = new Mat();
+		Mat edges = new Mat();
+		//vector to count all circles
+		Vector<Mat> circlesList = new Vector<Mat>();
 		
 		//make frame 8-bit single-channel, write from frame to gray
 		Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
 		//Imgproc.blur(gray, gray, new Size(7, 7));
 		Imgproc.medianBlur(gray, gray, 1);
 		
-		//find edges, write from gray to gray
-		//best ratio 2 or 3
-		int lowThreshold = 230;
-		//int ratio = 3;
-		int highThreshold = 255;
-		Imgproc.Canny(gray, gray, lowThreshold, highThreshold);
+		//min distance between circle centers
+		double dp = this.dpSlider.getValue();
+		double minDist = this.minDistSlider.getValue();
+		double lowThreshold = this.lowThresholdSlider.getValue();
+		double highThreshold = this.highThresholdSlider.getValue();
+		//accumulator - threshold for the circle centers at the detection stage
+		double accumulator = this.accumulatorSlider.getValue();		
+		// min/max Radius
+		int minRadius = (int) this.minRadiusSlider.getValue();
+		int maxRadius = (int) this.maxRadiusSlider.getValue();
 		
-		Mat circles = new Mat();
+		//find edges, write from gray to gray; best ratio 2 or 3
+		Imgproc.Canny(gray, edges, lowThreshold, highThreshold);
 		
-		//vector to count all circles
-		Vector<Mat> circlesList = new Vector<Mat>();
+		//display canny image
+		this.onFXThread(this.cannyImage.imageProperty(), this.mat2Image(edges));
 		
 		//find circles
-		int minRadius = 9;
-		int maxRadius = 20;
-		Imgproc.HoughCircles(gray, circles, Imgproc.CV_HOUGH_GRADIENT, 1.93, 10, 255, 40, minRadius, maxRadius);
+		Imgproc.HoughCircles(edges, circles, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, highThreshold, accumulator, minRadius, maxRadius);
 		
 		//coordinates of circle center and circle radius
 		double x = 0.0;
@@ -388,7 +323,14 @@ public class ObjRecognitionController
 			
 			circlesList.add(circles);
 		}
-		System.out.println(circlesList.size());
+		
+		// display values
+		String valuesToPrint = String.format(Locale.US, "dp: %.2f\tmin Dist: %.2f\tlow Threshold: %.2f"
+				+ "\thigh Threshold: %.2f\taccumulator: %.2f\tmin Radius: $d \tmax Radius: %d", 
+				dp, minDist, lowThreshold, highThreshold, accumulator, minRadius, maxRadius);
+		this.onFXThread(this.parameterValuesProp, valuesToPrint);
+		
+		System.out.println("all circles: " + circlesList.size());
 		return frame;
 	}
 	
