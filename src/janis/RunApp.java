@@ -23,7 +23,10 @@ public class RunApp {
 		Mat matBack = tool.makeMat("background.jpg");
 		Imgproc.medianBlur(matImg, matImg, 3);
 		Imgproc.medianBlur(matBack, matBack, 3);
+		Imgproc.cvtColor( matImg, matImg, Imgproc.COLOR_RGB2GRAY);
+		Imgproc.cvtColor( matBack, matBack, Imgproc.COLOR_RGB2GRAY);
 		matImg = tool.removeBackGround(matImg, matBack);
+		
 		BufferedImage image = tool.makeBuffImageFromMat(matImg);
 		image = tool.makeBinaryImg(image);
 		File ouptut = new File("YY.jpg");
