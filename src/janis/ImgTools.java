@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -16,7 +18,7 @@ import org.opencv.imgproc.Imgproc;
  * @author <a href="mailto:luigi.derussis@polito.it">Janis Karklins</a>
  * @description This class contains core methods to manipulate with mat and
  *              images using opencv library
- *              
+ * 
  * @version 1.1 (2017-02-18)
  * 
  */
@@ -118,12 +120,18 @@ public class ImgTools {
 	 *            numberof objects in image including background
 	 * @param matLeb
 	 *            lebelet mat from methods that counts objects
-	 * @return int array that contains all object pixel area
+	 * @return list
+	 * 			  0-area; 1-x; 2-y; 3-xsum; 4-ysum.
 	 */
-	public int[] getLebelsArray(int objNum, Mat matLeb) {
-		
+	public List getLebelsArray(int objNum, Mat matLeb) {
+
+		List<int[]> list = new ArrayList<int[]>();
 		int[] area = new int[objNum];
-		//int[] centr = new int[3]; //0 - segment num, 1- x cordinate, 2-y cordinate, 3 - xsum, 4-
+		int[] xsum = new int[objNum];
+		int[] ysum = new int[objNum];
+		int[] xcentr = new int[objNum];
+		int[] ycentr = new int[objNum];
+
 		double[] d;
 		int w = matLeb.cols();
 		int h = matLeb.rows();
@@ -135,12 +143,26 @@ public class ImgTools {
 				for (int i = 0; i <= objNum; i++) {
 					if (i == pixel) {
 						area[i]++;
+						xsum[i] = xsum[i] + x;
+						ysum[i] = ysum[i] + y;
+						break;
 					}
+
 				}
 			}
 		}
 
-		return area;
+		for (int i = 0; i < objNum; i++) {
+			xcentr[i] = xsum[i] / area[i];
+			ycentr[i] = ysum[i] / area[i];
+		}
+		list.add(area);
+		list.add(xcentr);
+		list.add(ycentr);
+		list.add(xsum);
+		list.add(ysum);
+
+		return list;
 
 	}
 

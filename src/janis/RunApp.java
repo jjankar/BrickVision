@@ -3,6 +3,7 @@ package janis;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -52,10 +53,14 @@ public class RunApp {
 		
 		//-------------------------------------------------------------------------------//
 		//get and print object pixel area
-		int[] area = tool.getLebelsArray(num, matLeb);
+		List list = tool.getLebelsArray(num, matLeb);
 	    
-	    for (int i = 0; i < area.length; i++) {
-			System.out.println("Area "+i+" is " + area[i] + " pixels");
+	    for (int i = 0; i < list.size(); i++) {
+	    	int[] area=(int[]) list.get(i);
+			for (int j = 0; j < area.length; j++) {
+				System.out.println("Value " + j + " is " + area[j] + " val");
+			}
+			System.out.println("-----------------------------------------------------------");
 		}	
 	    
 	    //------------------------------------------------------------------------------//
