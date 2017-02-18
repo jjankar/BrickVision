@@ -48,13 +48,19 @@ public class RunApp {
 		Mat matLeb = new Mat();
 		int num = Imgproc.connectedComponents(matImg, matLeb);
 		System.out.println("Labeled Matrice is created!");
-		System.out.println(num);
+		System.out.println(num-1);
 		
 		//-------------------------------------------------------------------------------//
-		
-		
-		
-		
+		//get and print object pixel area
+		int[] area = tool.getLebelsArray(num, matLeb);
+	    
+	    for (int i = 0; i < area.length; i++) {
+			System.out.println("Area "+i+" is " + area[i] + " pixels");
+		}	
+	    
+	    //------------------------------------------------------------------------------//
+	    
+	
         
         
         
