@@ -102,4 +102,7 @@ build.xml
 *.jpeg
 *.jpg
 *.png
+
+###video###
+*.mp4
 # End of https://www.gitignore.io/api/java,eclipse,opencv,maven
