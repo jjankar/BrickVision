@@ -165,5 +165,12 @@ public class ImgTools {
 		return list;
 
 	}
+	
+	/**
+	 * @param documenti That way we make documentation.
+	 */
+	public void testDoc(){
+		
+	}
 
 }
