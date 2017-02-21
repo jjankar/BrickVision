@@ -10,22 +10,30 @@
 	<right>
 		<VBox alignment="CENTER" spacing="10">
 			<padding>
-				<Insets right="10" left="10" />
+				<Insets right="50" left="10" />
 			</padding>
 			<Label text="dp" />
-			<Slider fx:id="dpSlider" min="1" max="3" value="2" blockIncrement="0.01" />
+			<Slider fx:id="dpSlider" min="1" max="3" value="1.88" blockIncrement="0.01" />
 			<Label text="min Distance" />
-			<Slider fx:id="minDistSlider" min="0" max="480" value="15" blockIncrement="1" />
+			<Slider fx:id="minDistSlider" min="1" max="100" value="15" blockIncrement="1" />
 			<Label text="Low Threshold" />
-			<Slider fx:id="lowThresholdSlider" min="0" max="255" value="200" blockIncrement="1" />
+			<Slider fx:id="lowThresholdSlider" min="0" max="255" value="240" blockIncrement="1" />
 			<Label text="High Threshold" />
 			<Slider fx:id="highThresholdSlider" min="0" max="255" value="255" blockIncrement="1" />
 			<Label text="Accumulator" />
-			<Slider fx:id="accumulatorSlider" min="0" max="200" value="40" blockIncrement="1" />
+			<Slider fx:id="accumulatorSlider" min="0" max="100" value="40" blockIncrement="1" />
 			<Label text="min Radius" />
-			<Slider fx:id="minRadiusSlider" min="0" max="120" value="5" blockIncrement="1" />
+			<Slider fx:id="minRadiusSlider" min="0" max="25" value="5" blockIncrement="1" />
 			<Label text="max Radius" />
-			<Slider fx:id="maxRadiusSlider" min="0" max="240" value="30" blockIncrement="1" />
+			<Slider fx:id="maxRadiusSlider" min="0" max="50" value="30" blockIncrement="1" />
+			<Label fx:id="resultValue" >
+				<padding>
+					<Insets top="50" />
+				</padding>
+				<font>
+					<Font size="32"/>
+				</font>
+			</Label>
 		</VBox>
 	</right>
 	<center>
@@ -42,9 +50,12 @@
 			<padding>
 				<Insets top="25" right="25" bottom="25" left="25" />
 			</padding>
-			<Button fx:id="cameraButton" alignment="center" text="Start camera" onAction="#startCamera" />
+			<Button fx:id="cameraButton" alignment="center" text="Start camera" onAction="#startCamera" prefWidth="120" />
+			<Button fx:id="pictureButton" alignment="center" text="Select picture" onAction="#selectPicture" prefWidth="120" />
 			<Separator />
 			<Label fx:id="parameterValues" />
+			<Separator />
+			<Label fx:id="radiusValues" />
 		</VBox>
 	</bottom>
 </BorderPane>

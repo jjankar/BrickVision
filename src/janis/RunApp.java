@@ -3,6 +3,7 @@ package janis;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -48,13 +49,23 @@ public class RunApp {
 		Mat matLeb = new Mat();
 		int num = Imgproc.connectedComponents(matImg, matLeb);
 		System.out.println("Labeled Matrice is created!");
-		System.out.println(num);
+		System.out.println(num-1);
 		
 		//-------------------------------------------------------------------------------//
-		
-		
-		
-		
+		//get and print object pixel area
+		List list = tool.getLebelsArray(num, matLeb);
+	    
+	    for (int i = 0; i < list.size(); i++) {
+	    	int[] area=(int[]) list.get(i);
+			for (int j = 0; j < area.length; j++) {
+				System.out.println("Value " + j + " is " + area[j] + " val");
+			}
+			System.out.println("-----------------------------------------------------------");
+		}	
+	    
+	    //------------------------------------------------------------------------------//
+	    
+	
         
         
         

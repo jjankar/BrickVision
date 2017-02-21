@@ -1,24 +1,15 @@
 package kbulindzs;
 
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.imageio.ImageIO;
-
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -49,13 +40,14 @@ import javafx.scene.image.ImageView;
  */
 public class ObjRecognitionController
 {
-	// FXML camera button
+	// camera and picture buttons
 	@FXML
 	private Button cameraButton;
+	@FXML
+	private Button pictureButton;
 	// the FXML area for showing the current frame
 	@FXML
 	private ImageView originalFrame;
-	
 	// the FXML area for showing the output of the canny operations
 	@FXML
 	private ImageView cannyImage;
@@ -77,6 +69,10 @@ public class ObjRecognitionController
 	// FXML label to show the current values set with the sliders
 	@FXML
 	private Label parameterValues;
+	@FXML
+	private Label radiusValues;
+	@FXML
+	private Label resultValue;
 	
 	// a timer for acquiring the video stream
 	private ScheduledExecutorService timer;
@@ -84,9 +80,12 @@ public class ObjRecognitionController
 	private VideoCapture capture = new VideoCapture();
 	// a flag to change the button behavior
 	private boolean cameraActive;
+	private boolean pictureActive;
 	
 	// property for object binding
 	private ObjectProperty<String> parameterValuesProp;
+	private ObjectProperty<String> radiusValuesProp;
+	private ObjectProperty<String> resultValueProp;
 		
 	/**
 	 * The action triggered by pushing the button on the GUI
@@ -94,10 +93,13 @@ public class ObjRecognitionController
 	@FXML
 	private void startCamera()
 	{
-		// bind a text property with the string containing the current range of
-		// HSV values for object detection
+		// bind a text property with the string containing the current properties
 		parameterValuesProp = new SimpleObjectProperty<>();
+		radiusValuesProp = new SimpleObjectProperty<>();
+		resultValueProp = new SimpleObjectProperty<>();
 		this.parameterValues.textProperty().bind(parameterValuesProp);
+		this.radiusValues.textProperty().bind(radiusValuesProp);
+		this.resultValue.textProperty().bind(resultValueProp);
 				
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.originalFrame, 400);
@@ -113,7 +115,7 @@ public class ObjRecognitionController
 			{
 				this.cameraActive = true;
 				
-				// grab a frame every 33 ms (30 frames/sec)
+				// grab a frame
 				Runnable frameGrabber = new Runnable() {
 					
 					@Override
@@ -125,7 +127,7 @@ public class ObjRecognitionController
 				};
 				
 				this.timer = Executors.newSingleThreadScheduledExecutor();
-				this.timer.scheduleAtFixedRate(frameGrabber, 0, 2000, TimeUnit.MILLISECONDS);
+				this.timer.scheduleAtFixedRate(frameGrabber, 0, 500, TimeUnit.MILLISECONDS);
 				
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
@@ -133,22 +135,7 @@ public class ObjRecognitionController
 			else
 			{
 				// log the error
-				System.out.println("Failed to open the camera connection...");
-				
-				//if camera not connected, show image
-				Runnable frameGrabber = new Runnable() {
-					
-					@Override
-					public void run()
-					{
-						Image imageToShow = grabImg();
-						originalFrame.setImage(imageToShow);
-					}
-				};
-				
-				this.timer = Executors.newSingleThreadScheduledExecutor();
-				this.timer.scheduleAtFixedRate(frameGrabber, 0, 1000, TimeUnit.MILLISECONDS);
-				
+				System.err.println("Failed to open the camera connection...");
 			}
 		}
 		else
@@ -176,6 +163,64 @@ public class ObjRecognitionController
 		}
 	}
 	
+	@FXML
+	private void selectPicture() {
+		// bind a text property with the string containing the current properties
+		parameterValuesProp = new SimpleObjectProperty<>();
+		radiusValuesProp = new SimpleObjectProperty<>();
+		resultValueProp = new SimpleObjectProperty<>();
+		this.parameterValues.textProperty().bind(parameterValuesProp);
+		this.radiusValues.textProperty().bind(radiusValuesProp);
+		this.resultValue.textProperty().bind(resultValueProp);
+		
+		// set a fixed width for all the image to show and preserve image ratio
+		this.imageViewProperties(this.originalFrame, 400);
+		this.imageViewProperties(this.cannyImage, 400);		
+
+		if (!this.pictureActive)
+		{
+			this.pictureActive = true;
+			
+			// grab a frame
+			Runnable frameGrabber = new Runnable() {
+				
+				@Override
+				public void run()
+				{
+					Image imageToShow = grabImg();
+					originalFrame.setImage(imageToShow);
+				}
+			};
+			
+			this.timer = Executors.newSingleThreadScheduledExecutor();
+			this.timer.scheduleAtFixedRate(frameGrabber, 0, 1000, TimeUnit.MILLISECONDS);
+			
+			// update the button content
+			this.pictureButton.setText("Pause");
+		}
+		else
+		{
+			// the camera is not active at this point
+			this.pictureActive = false;
+			// update again the button content
+			this.pictureButton.setText("Select Picture");
+			
+			// stop the timer
+			try
+			{
+				this.timer.shutdown();
+				this.timer.awaitTermination(33, TimeUnit.MILLISECONDS);
+			}
+			catch (InterruptedException e)
+			{
+				// log the exception
+				System.err.println("Exception in stopping the frame capture, trying to release the camera now... " + e);
+			}
+			
+			// release the camera
+			this.capture.release();
+		}		
+	}
 	
 	private Image grabImg() {
 		Mat frame = new Mat();
@@ -222,6 +267,20 @@ public class ObjRecognitionController
 		// init everything
 		Image imageToShow = null;
 		Mat frame = new Mat();
+		
+		//resize image with same aspect ratio
+		int originWidth = frame.width();
+		int originHeight = frame.height();
+		
+		if (originWidth > 640 && originHeight > 480){
+			if (originWidth > originHeight || originWidth == originHeight) {
+				Imgproc.resize(frame, frame, new Size(640, 640*originHeight/originWidth));
+			}
+			else if (originWidth < originHeight) {
+				
+				Imgproc.resize(frame, frame, new Size(480*originWidth/originHeight, 480));
+			}
+		}
 		
 		// check if the capture is open
 		if (this.capture.isOpened())
@@ -284,8 +343,8 @@ public class ObjRecognitionController
 		//accumulator - threshold for the circle centers at the detection stage
 		double accumulator = this.accumulatorSlider.getValue();		
 		// min/max Radius
-		int minRadius = (int) this.minRadiusSlider.getValue();
-		int maxRadius = (int) this.maxRadiusSlider.getValue();
+		double minRadius = this.minRadiusSlider.getValue();
+		double maxRadius = this.maxRadiusSlider.getValue();
 		
 		//find edges, write from gray to gray; best ratio 2 or 3
 		Imgproc.Canny(gray, edges, lowThreshold, highThreshold);
@@ -294,7 +353,7 @@ public class ObjRecognitionController
 		this.onFXThread(this.cannyImage.imageProperty(), this.mat2Image(edges));
 		
 		//find circles
-		Imgproc.HoughCircles(edges, circles, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, highThreshold, accumulator, minRadius, maxRadius);
+		Imgproc.HoughCircles(edges, circles, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, highThreshold, accumulator, (int) minRadius, (int) maxRadius);
 		
 		//coordinates of circle center and circle radius
 		double x = 0.0;
@@ -317,18 +376,21 @@ public class ObjRecognitionController
 			//draw circle outline
 			Imgproc.circle(frame, center, r, new Scalar(0, 0, 255), 1, 16, 0);
 			
-			System.out.println("x: " + x);
-			System.out.println("y: " + y);
 			System.out.println("r: " + r);
 			
 			circlesList.add(circles);
 		}
+
 		
 		// display values
-		String valuesToPrint = String.format(Locale.US, "dp: %.2f\tmin Dist: %.2f\tlow Threshold: %.2f"
-				+ "\thigh Threshold: %.2f\taccumulator: %.2f\tmin Radius: $d \tmax Radius: %d", 
-				dp, minDist, lowThreshold, highThreshold, accumulator, minRadius, maxRadius);
+		String valuesToPrint = "dp: " + String.format("%.2f", dp) + "\tmin Dist: " + String.format("%.2f", minDist) + 
+				"\tlow Threshold: " + String.format("%.2f", lowThreshold) + "\thigh Threshold: " + 
+				String.format("%.2f", highThreshold) + "\taccumulator: " + String.format("%.2f", accumulator);
+		String radiusToPrint = "min Radius: " + String.format("%.2f", minRadius) + "\tmax Radius: " + String.format("%.2f", maxRadius);
+		String resultToPrint = "Result: " + String.format("%d", circlesList.size());
 		this.onFXThread(this.parameterValuesProp, valuesToPrint);
+		this.onFXThread(this.radiusValuesProp, radiusToPrint);
+		this.onFXThread(this.resultValueProp, resultToPrint);
 		
 		System.out.println("all circles: " + circlesList.size());
 		return frame;
