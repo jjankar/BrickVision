@@ -21,7 +21,7 @@ public class ObjRecognition extends Application
 	 * @author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>
 	 * @version 1.1 (2015-11-26)
 	 * @since 1.0 (2015-01-13)
-	 * 
+	 * Bombino!
 	 */
 	@Override
 	public void start(Stage primaryStage)
