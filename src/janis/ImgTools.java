@@ -15,11 +15,11 @@ import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 /**
- * @author <a href="mailto:luigi.derussis@polito.it">Janis Karklins</a>
+ * @author <a href="mailto:jjankar@gmail.com">Janis Karklins</a>
  * @description This class contains core methods to manipulate with mat and
  *              images using opencv library
  * 
- * @version 1.1 (2017-02-18)
+ * @version 1.0 (2017-02-18)
  * 
  */
 public class ImgTools {
@@ -150,7 +150,7 @@ public class ImgTools {
 	 */
 	public BufferedImage makeBinaryImg(BufferedImage img) {
 		Mat mat = this.makeMatFromBuffImgGrey(img);
-		Imgproc.threshold(mat, mat, 1, 255, 0);
+		Imgproc.threshold(mat, mat, 10, 255, 0);
 
 		return this.makeBuffImageFromMat(mat);
 
