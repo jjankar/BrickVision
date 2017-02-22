@@ -33,9 +33,14 @@ import javafx.scene.image.ImageView;
  */
 public class FXController
 {
-	// the FXML button
+	// the FXML button for camera start
 	@FXML
 	private Button button;
+	
+	// the FXML button for image files
+	@FXML
+	private Button openImg;
+	
 	// the FXML image view
 	@FXML
 	private ImageView currentFrame;
@@ -51,6 +56,11 @@ public class FXController
 	
 	int counter = 0;
 	int f =0;
+	
+	@FXML
+	protected void openImage(){
+		
+	}
 	/**
 	 * The action triggered by pushing the button on the GUI
 	 *
@@ -135,7 +145,7 @@ public class FXController
 					Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
 					counter++;
 					System.out.println(counter);
-					if(counter==50){
+					if(counter==20){
 					Image img = Utils.mat2Image(frame);
 					String str = "GG"+f+".png";
 					File outputFile = new File(str);
