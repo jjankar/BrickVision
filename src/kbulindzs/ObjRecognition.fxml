@@ -13,19 +13,19 @@
 				<Insets right="50" left="10" />
 			</padding>
 			<Label text="dp" />
-			<Slider fx:id="dpSlider" min="1" max="3" value="1.88" blockIncrement="0.01" />
+			<Slider fx:id="dpSlider" min="1" max="3" value="1.59" blockIncrement="0.01" />
 			<Label text="min Distance" />
-			<Slider fx:id="minDistSlider" min="1" max="100" value="15" blockIncrement="1" />
+			<Slider fx:id="minDistSlider" min="1" max="100" value="18" blockIncrement="1" />
 			<Label text="Low Threshold" />
 			<Slider fx:id="lowThresholdSlider" min="1" max="255" value="240" blockIncrement="1" />
 			<Label text="High Threshold" />
 			<Slider fx:id="highThresholdSlider" min="1" max="255" value="255" blockIncrement="1" />
 			<Label text="Accumulator" />
-			<Slider fx:id="accumulatorSlider" min="1" max="100" value="40" blockIncrement="1" />
+			<Slider fx:id="accumulatorSlider" min="1" max="100" value="21" blockIncrement="1" />
 			<Label text="min Radius" />
-			<Slider fx:id="minRadiusSlider" min="1" max="25" value="5" blockIncrement="1" />
+			<Slider fx:id="minRadiusSlider" min="1" max="25" value="8" blockIncrement="1" />
 			<Label text="max Radius" />
-			<Slider fx:id="maxRadiusSlider" min="1" max="50" value="30" blockIncrement="1" />
+			<Slider fx:id="maxRadiusSlider" min="1" max="50" value="20" blockIncrement="1" />
 			<Label fx:id="resultValue" >
 				<padding>
 					<Insets top="50" />
