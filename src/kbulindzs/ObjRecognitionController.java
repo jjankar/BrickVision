@@ -2,7 +2,7 @@ package kbulindzs;
 
 
 import java.io.ByteArrayInputStream;
-import java.util.Locale;
+import java.io.File;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,20 +26,20 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 
 /**
- * The controller associated with the only view of our application. The
- * application logic is implemented here. It handles the button for
- * starting/stopping the camera, the acquired video stream, the relative
- * controls and the image segmentation process.
- * 
- * @author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>
- * @version 1.5 (2015-11-26)
- * @since 1.0 (2015-01-13)
- * 
+ * The application logic is implemented here. It handles the button for
+ * starting/stopping the camera and button to use image, the acquired video stream or image, the relative
+ * controls.
+ *
+ * @author Original program author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>; Modified by Kaspars Bulindzs,
+ *  Janis Karklins, Dmitrijs Ozerskis, Andrejs Paramonovs, Andrejs Derevjanko, Antons Kalcevs.  
+ * @version 1.0 (2017-02-24)
+ * @since 1.0 (2017-02-24)
+ *
  */
-public class ObjRecognitionController
-{
+public class ObjRecognitionController {
 	// camera and picture buttons
 	@FXML
 	private Button cameraButton;
@@ -88,11 +88,10 @@ public class ObjRecognitionController
 	private ObjectProperty<String> resultValueProp;
 		
 	/**
-	 * The action triggered by pushing the button on the GUI
+	 * The action triggered by pushing the button "Select Camera" on the GUI
 	 */
 	@FXML
-	private void startCamera()
-	{
+	private void startCamera() {
 		// bind a text property with the string containing the current properties
 		parameterValuesProp = new SimpleObjectProperty<>();
 		radiusValuesProp = new SimpleObjectProperty<>();
@@ -105,41 +104,38 @@ public class ObjRecognitionController
 		this.imageViewProperties(this.originalFrame, 400);
 		this.imageViewProperties(this.cannyImage, 400);
 		
-		if (!this.cameraActive)
-		{
+		if (!this.cameraActive) {
 			// start the video capture
 			this.capture.open(0);
 			
 			// is the video stream available?
-			if (this.capture.isOpened())
-			{
+			if (this.capture.isOpened()) {
 				this.cameraActive = true;
+				
+				this.pictureActive = false;
+				this.pictureButton.setText("Select Picture");
 				
 				// grab a frame
 				Runnable frameGrabber = new Runnable() {
 					
 					@Override
-					public void run()
-					{
+					public void run() {
 						Image imageToShow = grabFrame();
 						originalFrame.setImage(imageToShow);
 					}
 				};
-				
 				this.timer = Executors.newSingleThreadScheduledExecutor();
 				this.timer.scheduleAtFixedRate(frameGrabber, 0, 500, TimeUnit.MILLISECONDS);
 				
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
 			}
-			else
-			{
+			else {
 				// log the error
 				System.err.println("Failed to open the camera connection...");
 			}
 		}
-		else
-		{
+		else {
 			// the camera is not active at this point
 			this.cameraActive = false;
 			// update again the button content
@@ -147,22 +143,22 @@ public class ObjRecognitionController
 			
 			
 			// stop the timer
-			try
-			{
+			try {
 				this.timer.shutdown();
 				this.timer.awaitTermination(33, TimeUnit.MILLISECONDS);
 			}
-			catch (InterruptedException e)
-			{
+			catch (InterruptedException e) {
 				// log the exception
 				System.err.println("Exception in stopping the frame capture, trying to release the camera now... " + e);
 			}
-			
 			// release the camera
 			this.capture.release();
 		}
 	}
 	
+	/**
+	 * The action triggered by pushing the button "Select Picture" on the GUI
+	 */	
 	@FXML
 	private void selectPicture() {
 		// bind a text property with the string containing the current properties
@@ -175,61 +171,65 @@ public class ObjRecognitionController
 		
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.originalFrame, 400);
-		this.imageViewProperties(this.cannyImage, 400);		
-
-		if (!this.pictureActive)
-		{
+		this.imageViewProperties(this.cannyImage, 400);
+		
+		if (!this.pictureActive) {
 			this.pictureActive = true;
+			
+			FileChooser chooser = new FileChooser();
+			FileChooser.ExtensionFilter filterPNG = new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png");
+			chooser.getExtensionFilters().addAll(filterPNG);
+			final File file = chooser.showOpenDialog(null);
 			
 			// grab a frame
 			Runnable frameGrabber = new Runnable() {
 				
 				@Override
-				public void run()
-				{
-					Image imageToShow = grabImg();
+				public void run() {
+					Image imageToShow = grabImg(file);
 					originalFrame.setImage(imageToShow);
 				}
 			};
-			
 			this.timer = Executors.newSingleThreadScheduledExecutor();
 			this.timer.scheduleAtFixedRate(frameGrabber, 0, 1000, TimeUnit.MILLISECONDS);
 			
 			// update the button content
 			this.pictureButton.setText("Pause");
 		}
-		else
-		{
+		else {
 			// the camera is not active at this point
 			this.pictureActive = false;
 			// update again the button content
 			this.pictureButton.setText("Select Picture");
 			
 			// stop the timer
-			try
-			{
+			try {
 				this.timer.shutdown();
 				this.timer.awaitTermination(33, TimeUnit.MILLISECONDS);
 			}
-			catch (InterruptedException e)
-			{
-				// log the exception
+			catch (InterruptedException e) {
 				System.err.println("Exception in stopping the frame capture, trying to release the camera now... " + e);
 			}
-			
 			// release the camera
 			this.capture.release();
 		}		
 	}
 	
-	private Image grabImg() {
+	/**
+	 * change image width and height, call method to find circles in image
+	 * @param file
+	 *            input file selected png image
+	 * @return
+	 *            image with found circles
+	 */
+	private Image grabImg(File file) {
 		Mat frame = new Mat();
 		Image imageToShow = null;
 		
 		try {
-			frame = Imgcodecs.imread("/home/student/workspace/circles/dice4.png");
+			String path = file.getAbsolutePath();
+			frame = Imgcodecs.imread(path);
 			
-			//resize image with same aspect ratio
 			int originWidth = frame.width();
 			int originHeight = frame.height();
 			
@@ -238,37 +238,30 @@ public class ObjRecognitionController
 					Imgproc.resize(frame, frame, new Size(640, 640*originHeight/originWidth));
 				}
 				else if (originWidth < originHeight) {
-					
 					Imgproc.resize(frame, frame, new Size(480*originWidth/originHeight, 480));
 				}
 			}
-			
-			//find circles and show them
+			// find circles and show them
 			frame = this.findCircles(frame);
 			
-			//convert the Mat object (OpenCV) to Image (JavaFX)
+			// convert the Mat object (OpenCV) to Image (JavaFX)
 			imageToShow = mat2Image(frame);
 		} catch (Exception e) {
 			System.err.print("ERROR");
 			e.printStackTrace();
 		}
-		
 		return imageToShow;
 	}
 	
 	/**
-	 * Get a frame from the opened video stream (if any)
-	 * 
-	 * @return the {@link Image} to show
+	 * change frame width and height, call method to find circles in frame
+	 * @return
+	 *            frame with found circles
 	 */
-	
-	private Image grabFrame()
-	{
-		// init everything
+	private Image grabFrame() {
 		Image imageToShow = null;
 		Mat frame = new Mat();
 		
-		//resize image with same aspect ratio
 		int originWidth = frame.width();
 		int originHeight = frame.height();
 		
@@ -277,85 +270,76 @@ public class ObjRecognitionController
 				Imgproc.resize(frame, frame, new Size(640, 640*originHeight/originWidth));
 			}
 			else if (originWidth < originHeight) {
-				
 				Imgproc.resize(frame, frame, new Size(480*originWidth/originHeight, 480));
 			}
 		}
 		
-		// check if the capture is open
-		if (this.capture.isOpened())
-		{
-			try
-			{
+		if (this.capture.isOpened()) {
+			try {
 				// read the current frame
 				this.capture.read(frame);
 				
 				// if the frame is not empty, process it
-				if (!frame.empty())
-				{
-					
-					//count circles and show them
+				if (!frame.empty()) {
+					// count circles and show them
 					frame = this.findCircles(frame);
 					
 					// convert the Mat object (OpenCV) to Image (JavaFX)
 					imageToShow = mat2Image(frame);
 				}
-				
 			}
-			catch (Exception e)
-			{
-				// log the (full) error
+			catch (Exception e) {
 				System.err.print("ERROR");
 				e.printStackTrace();
 			}
 		}
-				
 		return imageToShow;
 	}
 	
 	/**
-	 * @param maskedImage
-	 *            the binary image to be used as a mask
+	 * 
 	 * @param frame
-	 *            the original {@link Mat} image to be used for drawing the
-	 *            objects contours
-	 * @return the {@link Mat} image with the objects contours framed
+	 *            
+	 * @return
+	 *            
 	 */
-	
 	private Mat findCircles(Mat frame) {
-		
 		Mat gray = new Mat();
 		Mat circles = new Mat();
 		Mat edges = new Mat();
-		//vector to count all circles
+		
+		// vector to count all circles
 		Vector<Mat> circlesList = new Vector<Mat>();
 		
-		//make frame 8-bit single-channel, write from frame to gray
+		// make frame 8-bit single-channel, blur it
 		Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
-		//Imgproc.blur(gray, gray, new Size(7, 7));
 		Imgproc.medianBlur(gray, gray, 1);
 		
-		//min distance between circle centers
+		// inverse ratio of the accumulator resolution to the image resolution
 		double dp = this.dpSlider.getValue();
+		// min distance between circle centers
 		double minDist = this.minDistSlider.getValue();
+		// separate out regions of an image corresponding to objects which we want to analyze
+		// based on the variation of intensity between object and background pixels
 		double lowThreshold = this.lowThresholdSlider.getValue();
 		double highThreshold = this.highThresholdSlider.getValue();
-		//accumulator - threshold for the circle centers at the detection stage
+		// threshold for the circle centers at the detection stage
 		double accumulator = this.accumulatorSlider.getValue();		
 		// min/max Radius
 		double minRadius = this.minRadiusSlider.getValue();
 		double maxRadius = this.maxRadiusSlider.getValue();
 		
-		//find edges, write from gray to gray; best ratio 2 or 3
+		// find edges
 		Imgproc.Canny(gray, edges, lowThreshold, highThreshold);
 		
-		//display canny image
+		// display canny image
 		this.onFXThread(this.cannyImage.imageProperty(), this.mat2Image(edges));
 		
-		//find circles
-		Imgproc.HoughCircles(edges, circles, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, highThreshold, accumulator, (int) minRadius, (int) maxRadius);
+		// find circles
+		Imgproc.HoughCircles(edges, circles, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, 255, accumulator,
+				(int) minRadius, (int) maxRadius);
 		
-		//coordinates of circle center and circle radius
+		// coordinates of circle center and circle radius
 		double x = 0.0;
 		double y = 0.0;
 		int r = 0;
@@ -371,16 +355,15 @@ public class ObjRecognitionController
 				r = (int) data[2];
 			}
 			Point center = new Point(x, y);
-			//draw circle center
+			// draw circle center
 			Imgproc.circle(frame, center, 3, new Scalar(0, 255, 0), -1, 8, 0);
-			//draw circle outline
+			// draw circle outline
 			Imgproc.circle(frame, center, r, new Scalar(0, 0, 255), 1, 16, 0);
 			
 			System.out.println("r: " + r);
-			
+			// count all circles
 			circlesList.add(circles);
 		}
-
 		
 		// display values
 		String valuesToPrint = "dp: " + String.format("%.2f", dp) + "\tmin Dist: " + String.format("%.2f", minDist) + 
@@ -392,11 +375,8 @@ public class ObjRecognitionController
 		this.onFXThread(this.radiusValuesProp, radiusToPrint);
 		this.onFXThread(this.resultValueProp, resultToPrint);
 		
-		System.out.println("all circles: " + circlesList.size());
 		return frame;
 	}
-	
-	
 	
 	/**
 	 * Set typical {@link ImageView} properties: a fixed width and the
@@ -407,8 +387,7 @@ public class ObjRecognitionController
 	 * @param dimension
 	 *            the width of the image to set
 	 */
-	private void imageViewProperties(ImageView image, int dimension)
-	{
+	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
 		image.setFitWidth(dimension);
 		// preserve the image ratio
@@ -423,14 +402,12 @@ public class ObjRecognitionController
 	 *            the {@link Mat} representing the current frame
 	 * @return the {@link Image} to show
 	 */
-	private Image mat2Image(Mat frame)
-	{
+	private Image mat2Image(Mat frame) {
 		// create a temporary buffer
 		MatOfByte buffer = new MatOfByte();
 		// encode the frame in the buffer, according to the PNG format
 		Imgcodecs.imencode(".png", frame, buffer);
-		// build and return an Image created from the image encoded in the
-		// buffer
+		// build and return an Image created from the image encoded in the buffer
 		return new Image(new ByteArrayInputStream(buffer.toArray()));
 	}
 	
@@ -443,8 +420,7 @@ public class ObjRecognitionController
 	 * @param value
 	 *            the value to set for the given {@link ObjectProperty}
 	 */
-	private <T> void onFXThread(final ObjectProperty<T> property, final T value)
-	{
+	private <T> void onFXThread(final ObjectProperty<T> property, final T value) {
 		Platform.runLater(new Runnable() {
 			
 			@Override
@@ -454,5 +430,4 @@ public class ObjRecognitionController
 			}
 		});
 	}
-	
 }

@@ -8,26 +8,26 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.fxml.FXMLLoader;
 
-public class ObjRecognition extends Application
-{
+/**
+* The main class for a JavaFX application. It creates and handles the main
+* window with its resources (style, graphics, etc.).
+* This application counts pips on dice using "findCircles" method.
+* Use sliders to adjust the image or video for better results. Found circles are outlined and pip
+* count displayed.
+*
+* @author Original program author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>; Modified by Kaspars Bulindzs,
+*  Janis Karklins, Dmitrijs Ozerskis, Andrejs Paramonovs, Andrejs Derevjanko, Antons Kalcevs.  
+* @version 1.0 (2017-02-24)
+* @since 1.0 (2017-02-24)
+*
+*/
+public class ObjRecognition extends Application {
 	/**
-	 * The main class for a JavaFX application. It creates and handles the main
-	 * window with its resources (style, graphics, etc.).
-	 * 
-	 * This application looks for any tennis ball in the camera video stream and
-	 * try to select them according to their HSV values. Found tennis balls are
-	 * framed with a blue line.
-	 * 
-	 * @author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>
-	 * @version 1.1 (2015-11-26)
-	 * @since 1.0 (2015-01-13)
-	 * 
-	 */
+	* The main entry point for all JavaFX applications.
+	*/
 	@Override
-	public void start(Stage primaryStage)
-	{
-		try
-		{
+	public void start(Stage primaryStage) {
+		try {
 			// load the FXML resource
 			BorderPane root = (BorderPane) FXMLLoader.load(getClass().getResource("ObjRecognition.fxml"));
 			// set a whitesmoke background
@@ -35,21 +35,22 @@ public class ObjRecognition extends Application
 			// create and style a scene
 			Scene scene = new Scene(root, 800, 800);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-			// create the stage with the given title and the previously created
-			// scene
+			// create the stage with the given title and the previously created scene
 			primaryStage.setTitle("Object Recognition");
 			primaryStage.setScene(scene);
 			// show the GUI
 			primaryStage.show();
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public static void main(String[] args)
-	{
+	/**
+     * Start of the program
+     * @param args Argument from main method
+     */
+	public static void main(String[] args) {
 		// load the native OpenCV library
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
