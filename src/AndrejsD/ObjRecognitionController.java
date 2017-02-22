@@ -1,4 +1,4 @@
-package kbulindzs;
+package AndrejsD;
 
 
 import java.io.ByteArrayInputStream;
@@ -307,14 +307,13 @@ public class ObjRecognitionController {
 		Mat gray = new Mat();
 		Mat circles = new Mat();
 		Mat edges = new Mat();
-		Mat morph = new Mat();
 		
 		// vector to count all circles
 		Vector<Mat> circlesList = new Vector<Mat>();
 		
 		// make frame 8-bit single-channel, blur it
 		Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
-		Imgproc.medianBlur(gray, gray, 3);
+		Imgproc.medianBlur(gray, gray, 1);
 		
 		// inverse ratio of the accumulator resolution to the image resolution
 		double dp = this.dpSlider.getValue();
@@ -333,26 +332,11 @@ public class ObjRecognitionController {
 		// find edges
 		Imgproc.Canny(gray, edges, lowThreshold, highThreshold);
 		
-		// morphological operators, dilate with large element, erode with small ones
-		Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(4, 4));
-		Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(1, 1));
-		
-		Imgproc.erode(edges, morph, erodeElement);
-		Imgproc.erode(edges, morph, erodeElement);
-		Imgproc.erode(edges, morph, erodeElement);
-		Imgproc.erode(edges, morph, erodeElement);
-		
-		Imgproc.dilate(edges, morph, dilateElement);
-		Imgproc.dilate(edges, morph, dilateElement);
-		Imgproc.dilate(edges, morph, dilateElement);
-		Imgproc.dilate(edges, morph, dilateElement);
-		
-		
 		// display canny image
-		this.onFXThread(this.cannyImage.imageProperty(), this.mat2Image(morph));
+		this.onFXThread(this.cannyImage.imageProperty(), this.mat2Image(edges));
 		
 		// find circles
-		Imgproc.HoughCircles(morph, circles, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, 255, accumulator,
+		Imgproc.HoughCircles(edges, circles, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, 255, accumulator,
 				(int) minRadius, (int) maxRadius);
 		
 		// coordinates of circle center and circle radius
@@ -391,7 +375,6 @@ public class ObjRecognitionController {
 		this.onFXThread(this.radiusValuesProp, radiusToPrint);
 		this.onFXThread(this.resultValueProp, resultToPrint);
 		
-		System.out.println("\t");
 		return frame;
 	}
 	

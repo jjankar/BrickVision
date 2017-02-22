@@ -1,4 +1,4 @@
-package kbulindzs;
+package AndrejsD;
 
 import org.opencv.core.Core;
 
