@@ -1,4 +1,4 @@
-package janis;
+package lv.brick_vision;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
