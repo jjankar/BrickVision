@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+	
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="lv.brick_vision.video.edge.ObjRecognitionController">
+	<right>
+		<VBox alignment="CENTER" spacing="10">
+			<padding>
+				<Insets right="50" left="10" />
+			</padding>
+			<Label text="dp" />
+			<Slider fx:id="dpSlider" min="1" max="3" value="1.59" blockIncrement="0.01" />
+			<Label text="min Distance" />
+			<Slider fx:id="minDistSlider" min="1" max="100" value="18" blockIncrement="1" />
+			<Label text="dilate" />
+			<Slider fx:id="dilateSlider" min="1" max="10" value="6" blockIncrement="1" />
+			<Label text="erode" />
+			<Slider fx:id="erodeSlider" min="1" max="10" value="1" blockIncrement="1" />
+			<Label text="Accumulator" />
+			<Slider fx:id="accumulatorSlider" min="1" max="100" value="21" blockIncrement="1" />
+			<Label text="min Radius" />
+			<Slider fx:id="minRadiusSlider" min="1" max="25" value="8" blockIncrement="1" />
+			<Label text="max Radius" />
+			<Slider fx:id="maxRadiusSlider" min="1" max="50" value="20" blockIncrement="1" />
+			<Label fx:id="resultValue" >
+				<padding>
+					<Insets top="50" />
+				</padding>
+				<font>
+					<Font size="24"/>
+				</font>
+			</Label>
+		</VBox>
+	</right>
+	<center>
+		<VBox alignment="CENTER" spacing="5">
+			<padding>
+				<Insets right="10" left="10" />
+			</padding>
+			<ImageView fx:id="originalFrame" />
+			<ImageView fx:id="cannyImage" />
+		</VBox>
+	</center>
+	<bottom>
+		<VBox alignment="CENTER" spacing="15">
+			<padding>
+				<Insets top="25" right="25" bottom="25" left="25" />
+			</padding>
+			<Button fx:id="cameraButton" alignment="center" text="Start camera" onAction="#startCamera" prefWidth="120" />
+			<Button fx:id="pictureButton" alignment="center" text="Select picture" onAction="#selectPicture" prefWidth="120" />
+			<Separator />
+			<Label fx:id="parameterValues" />
+			<Separator />
+			<Label fx:id="radiusValues" />
+		</VBox>
+	</bottom>
+</BorderPane>
