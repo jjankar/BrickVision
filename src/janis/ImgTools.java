@@ -150,7 +150,7 @@ public class ImgTools {
 	 */
 	public BufferedImage makeBinaryImg(BufferedImage img) {
 		Mat mat = this.makeMatFromBuffImgGrey(img);
-		Imgproc.threshold(mat, mat, 10, 255, 0);
+		Imgproc.threshold(mat, mat, 1, 255, 0);
 
 		return this.makeBuffImageFromMat(mat);
 
@@ -177,6 +177,7 @@ public class ImgTools {
 		int w = matLeb.cols();
 		int h = matLeb.rows();
 		for (int y = 0; y < h; y++) {
+			
 			for (int x = 0; x < w; x++) {
 				d = matLeb.get(y, x);
 				double pixel = d[0];
