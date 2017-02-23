@@ -164,6 +164,7 @@ public class ImgTools {
 	 * @return list
 	 * 			  0-area; 1-x; 2-y; 3-xsum; 4-ysum.
 	 */
+	@SuppressWarnings("rawtypes")
 	public List getLebelsArray(int objNum, Mat matLeb) {
 
 		List<int[]> list = new ArrayList<int[]>();

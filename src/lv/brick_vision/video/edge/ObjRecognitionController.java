@@ -1,7 +1,6 @@
 package lv.brick_vision.video.edge;
 
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,9 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -24,7 +21,6 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -34,6 +30,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import lv.brick_vision.video.Utils;
 
 /**
  * The application logic is implemented here. It handles the button for
@@ -254,7 +251,7 @@ public class ObjRecognitionController {
    		 frame = this.findRect(frame);
    		 
    		 // convert the Mat object (OpenCV) to Image (JavaFX)
-   		 imageToShow = mat2Image(frame);
+   		 imageToShow = Utils.mat2Image(frame);
    	 } catch (Exception e) {
    		 System.err.print("ERROR");
    		 e.printStackTrace();
@@ -295,7 +292,7 @@ public class ObjRecognitionController {
    				 frame = this.findRect(frame);
    				 
    				 // convert the Mat object (OpenCV) to Image (JavaFX)
-   				 imageToShow = mat2Image(frame);
+   				 imageToShow = Utils.mat2Image(frame);
    			 }
    		 }
    		 catch (Exception e) {
@@ -366,7 +363,7 @@ public class ObjRecognitionController {
    	 
    	 
    	 // display canny image
-   	 this.onFXThread(this.cannyImage.imageProperty(), this.mat2Image(morph));
+   	 Utils.onFXThread(this.cannyImage.imageProperty(), Utils.mat2Image(morph));
    	 
    	 // find circles
    	 Imgproc.HoughCircles(morph, circles, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, 255, accumulator,
@@ -404,15 +401,16 @@ public class ObjRecognitionController {
    			 String.format("%.0f", erodeElem) + "\taccumulator: " + String.format("%.1f", accumulator);
    	 String radiusToPrint = "min Radius: " + String.format("%.1f", minRadius) + "\tmax Radius: " + String.format("%.1f", maxRadius);
    	 String resultToPrint = "Result: " + String.format("%d", circlesList.size());
-   	 this.onFXThread(this.parameterValuesProp, valuesToPrint);
-   	 this.onFXThread(this.radiusValuesProp, radiusToPrint);
-   	 this.onFXThread(this.resultValueProp, resultToPrint);
+   	 Utils.onFXThread(this.parameterValuesProp, valuesToPrint);
+   	 Utils.onFXThread(this.radiusValuesProp, radiusToPrint);
+   	 Utils.onFXThread(this.resultValueProp, resultToPrint);
    	 
    	 System.out.println("\t");
    	 return frame;
     }
     
-    private Mat findRect(Mat frame) {
+    @SuppressWarnings("unused")
+	private Mat findRect(Mat frame) {
    	 
    	 Mat gray = new Mat();
    	 Mat edges = new Mat();
@@ -460,7 +458,7 @@ public class ObjRecognitionController {
    	 
    	 
  		 //find contours    
-   	 this.onFXThread(this.cannyImage.imageProperty(), this.mat2Image(morph));
+   	 Utils.onFXThread(this.cannyImage.imageProperty(), Utils.mat2Image(morph));
    						 
    	 Imgproc.findContours(morph, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
    	 
@@ -534,22 +532,6 @@ public class ObjRecognitionController {
    	 image.setPreserveRatio(true);
     }
     
-    /**
-     * Convert a {@link Mat} object (OpenCV) in the corresponding {@link Image}
-     * for JavaFX
-     *
-     * @param frame
-     *        	the {@link Mat} representing the current frame
-     * @return the {@link Image} to show
-     */
-    private Image mat2Image(Mat frame) {
-   	 // create a temporary buffer
-   	 MatOfByte buffer = new MatOfByte();
-   	 // encode the frame in the buffer, according to the PNG format
-   	 Imgcodecs.imencode(".png", frame, buffer);
-   	 // build and return an Image created from the image encoded in the buffer
-   	 return new Image(new ByteArrayInputStream(buffer.toArray()));
-    }
     
     // Angle point calculation
    	 private double angle(Point pt1, Point pt2, Point pt0) {
@@ -560,23 +542,4 @@ public class ObjRecognitionController {
    	 	return (dx1*dx2 + dy1*dy2)/Math.sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
    	 }
     
-    /**
-     * Generic method for putting element running on a non-JavaFX thread on the
-     * JavaFX thread, to properly update the UI
-     *
-     * @param property
-     *        	a {@link ObjectProperty}
-     * @param value
-     *        	the value to set for the given {@link ObjectProperty}
-     */
-    private <T> void onFXThread(final ObjectProperty<T> property, final T value) {
-   	 Platform.runLater(new Runnable() {
-   		 
-   		 @Override
-   		 public void run()
-   		 {
-   			 property.set(value);
-   		 }
-   	 });
-    }
 }

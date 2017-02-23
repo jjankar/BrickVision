@@ -18,7 +18,7 @@ import org.opencv.imgproc.Imgproc;
 
 import lv.brick_vision.core.ImgTools;
 
-public class RunApp {
+public class RunLab {
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
