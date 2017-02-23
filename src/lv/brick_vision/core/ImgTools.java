@@ -103,7 +103,7 @@ public class ImgTools {
 	 *            mat with background and objects
 	 * @param backGround
 	 *            mat only background
-	 * @return img - backGround
+	 * @return img - without backGround and all colors of object minus background colors at the pixel
 	 */
 	public Mat removeBackGround(Mat img, Mat backGround) {
 
@@ -158,9 +158,9 @@ public class ImgTools {
 
 	/**
 	 * @param objNum
-	 *            numberof objects in image including background
+	 *            Number of objects in image including background
 	 * @param matLeb
-	 *            lebelet mat from methods that counts objects
+	 *            Labeled mat from methods that counts objects
 	 * @return list
 	 * 			  0-area; 1-x; 2-y; 3-xsum; 4-ysum.
 	 */
