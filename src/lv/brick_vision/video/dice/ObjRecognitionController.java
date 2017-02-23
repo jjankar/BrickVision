@@ -209,7 +209,6 @@ public class ObjRecognitionController {
 			this.imageActive = false;
 			// update again the button content
 			this.imageButton.setText("Select Image");
-			
 			// stop the timer
 			try {
 				this.timer.shutdown();
