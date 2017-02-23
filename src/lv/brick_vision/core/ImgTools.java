@@ -75,7 +75,7 @@ public class ImgTools {
 	 * 
 	 * 
 	 */
-	public Mat makeMat(String imgName) throws IOException {
+	public Mat img2Mat_CV_8UC3(String imgName) throws IOException {
 		File input = new File(imgName);
 		BufferedImage image = ImageIO.read(input);
 		byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
@@ -89,7 +89,7 @@ public class ImgTools {
 	 * @param mat
 	 * @return bufferedImage type is set to TYPE_BYTE_GRAY
 	 */
-	public BufferedImage makeBuffImageFromMat(Mat mat) {
+	public BufferedImage mat2BuffImgGray(Mat mat) {
 		byte[] data = new byte[mat.rows() * mat.cols() * (int) (mat.elemSize())];
 		mat.get(0, 0, data);
 		BufferedImage image = new BufferedImage(mat.cols(), mat.rows(), BufferedImage.TYPE_BYTE_GRAY);
@@ -118,7 +118,7 @@ public class ImgTools {
 	 *            buffered image
 	 * @return mat with CvType.CV_8UC3
 	 */
-	public Mat makeMatFromBuffImg(BufferedImage image) {
+	public Mat buffImg2Mat_CV_8UC3(BufferedImage image) {
 
 		byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 		Mat matImg = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
@@ -133,7 +133,7 @@ public class ImgTools {
 	 *            buffered image
 	 * @return mat with CvType.CV_8UC1
 	 */
-	public Mat makeMatFromBuffImgGrey(BufferedImage image) {
+	public Mat buffImg2Mat_CV_8UC1(BufferedImage image) {
 
 		byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 		Mat matImg = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC1);
@@ -149,10 +149,10 @@ public class ImgTools {
 	 * @return mat with threshold 1 set color 255 ant type is binary
 	 */
 	public BufferedImage makeBinaryImg(BufferedImage img) {
-		Mat mat = this.makeMatFromBuffImgGrey(img);
+		Mat mat = this.buffImg2Mat_CV_8UC1(img);
 		Imgproc.threshold(mat, mat, 1, 255, 0);
 
-		return this.makeBuffImageFromMat(mat);
+		return this.mat2BuffImgGray(mat);
 
 	}
 

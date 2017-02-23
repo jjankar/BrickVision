@@ -58,7 +58,7 @@ public class RunApp {
 		//matImg = tool.removeBackGround(matImg, matBack);
 		Imgproc.findContours(matImg, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 		System.out.println("Contures: "+contours.size());
-		BufferedImage image1 = tool.makeBuffImageFromMat(matImg);
+		BufferedImage image1 = tool.mat2BuffImgGray(matImg);
 		File ouptut = new File("YY.png");
         ImageIO.write(image1, "png", ouptut);
 		//binary matrice
@@ -67,7 +67,7 @@ public class RunApp {
 		//remove background
 		Imgproc.threshold(matImg, matImg, 20, 255, 1);
 		//------------------------------------------------------------------------//
-		BufferedImage image = tool.makeBuffImageFromMat(matImg);
+		BufferedImage image = tool.mat2BuffImgGray(matImg);
 		image = tool.makeBinaryImg(image);
 		//-------------------------------------------------------------------------//
 		//make binary image
@@ -88,13 +88,13 @@ public class RunApp {
 		List<int []> list = tool.getLebelsArray(num, matLeb);
 	    int [] x= list.get(1);
 	    int [] y= list.get(2);
-	    Mat mat = tool.makeMatFromBuffImgGrey(image);
+	    Mat mat = tool.buffImg2Mat_CV_8UC1(image);
 	    for (int j = 0; j < x.length; j++) {
 	    	Imgproc.rectangle(mat, new Point(x[j], y[j]), new Point(x[j]+ 20, y[j] + 20), new Scalar(0,0,0), 5);
 		
 	    }
 	    
-	    BufferedImage image3 = tool.makeBuffImageFromMat(mat);
+	    BufferedImage image3 = tool.mat2BuffImgGray(mat);
 	    File ouptut1 = new File("rect.png");
         ImageIO.write(image3, "png", ouptut1);
 	    
