@@ -27,12 +27,25 @@ public class RunApp {
 		
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
-		Mat matImg = tool.img2Mat("GG1.png");
-		
-		Mat matBack = tool.img2Mat("GG0.png");
+		Mat matImg = tool.img2Mat("IMG_5737.png");
+		//Mat matImg = tool.img2Mat("dice13.png");
+		//Mat matBack = tool.img2Mat("GG0.png");
 		System.out.println("col: "+ matImg.cols()+" row: "+matImg.rows());
+		
+		
+		
 		Imgproc.blur(matImg, matImg, new Size(7,7));
-		//Imgproc.blur(matBack, matBack, new Size(5,5));
+		//Imgproc.medianBlur(matImg, matImg, 7);
+		
+		int erosion_size = 10;
+		Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new  Size(2*erosion_size + 1, 2*erosion_size+1));
+        Imgproc.erode(matImg, matImg, element);
+		
+		/*int dilation_size = 3;
+		Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new  Size(2*dilation_size + 1, 2*dilation_size+1));
+        Imgproc.dilate(matImg, matImg, element);*/
+		//Imgproc.dia
+		//Imgproc.blur(matBack, matBack, new Size(7,7));
 		
 		//--------------------------------------------------------------------------//
 		//removing noise COLOR_RGB2GRAY
@@ -50,7 +63,7 @@ public class RunApp {
 		 System.out.println("Binary image is created!");
 		//-------------------------------------------------------------------------//
 		//remove background
-		Imgproc.threshold(matImg, matImg, 65, 255, 1);
+		Imgproc.threshold(matImg, matImg, 20, 255, 1);
 		//------------------------------------------------------------------------//
 		BufferedImage image = tool.makeBuffImageFromMat(matImg);
 		image = tool.makeBinaryImg(image);
@@ -75,7 +88,7 @@ public class RunApp {
 	    int [] y= list.get(2);
 	    Mat mat = tool.makeMatFromBuffImgGrey(image);
 	    for (int j = 0; j < x.length; j++) {
-	    	Imgproc.rectangle(mat, new Point(x[j], y[j]), new Point(x[j]+ 5, y[j] + 5), new Scalar(0,0,0), 1);
+	    	Imgproc.rectangle(mat, new Point(x[j], y[j]), new Point(x[j]+ 20, y[j] + 20), new Scalar(0,0,0), 5);
 		
 	    }
 	    
