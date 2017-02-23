@@ -36,7 +36,7 @@ public class ObjRecognition extends Application {
 			Scene scene = new Scene(root, 800, 800);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			// create the stage with the given title and the previously created scene
-			primaryStage.setTitle("Object Recognition");
+			primaryStage.setTitle("Dice Counting");
 			primaryStage.setScene(scene);
 			// show the GUI
 			primaryStage.show();
