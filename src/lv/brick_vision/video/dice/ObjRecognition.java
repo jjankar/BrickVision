@@ -15,8 +15,8 @@ import javafx.fxml.FXMLLoader;
 * Use sliders to adjust the image or video for better results. Found circles are outlined and pip
 * count displayed.
 *
-* @author Original program author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>; Modified by Kaspars Bulindzs,
-*  Janis Karklins, Dmitrijs Ozerskis, Andrejs Paramonovs, Andrejs Derevjanko, Antons Kalcevs.  
+* @author Original program author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>; Modified by 
+* Kaspars Bulindzs, Janis Karklins, Dmitrijs Ozerskis, Andrejs Paramonovs, Andrejs Derevjanko, Antons Kalcevs.  
 * @version 1.0 (2017-02-24)
 * @since 1.0 (2017-02-24)
 *

@@ -33,8 +33,8 @@ import javafx.stage.FileChooser;
  * starting/stopping the camera and button to use image, the acquired video stream or image, the relative
  * controls.
  *
- * @author Original program author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>; Modified by Kaspars Bulindzs,
- *  Janis Karklins, Dmitrijs Ozerskis, Andrejs Paramonovs, Andrejs Derevjanko, Antons Kalcevs.  
+ * @author Original program author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>; Modified by 
+ * Kaspars Bulindzs, Janis Karklins, Dmitrijs Ozerskis, Andrejs Paramonovs, Andrejs Derevjanko, Antons Kalcevs.  
  * @version 1.0 (2017-02-24)
  * @since 1.0 (2017-02-24)
  *
@@ -52,7 +52,6 @@ public class ObjRecognitionController {
 	@FXML
 	private ImageView cannyImage;
 	// FXML slider for parameters
-	
 	@FXML
 	private Slider dilateSlider;
 	@FXML
@@ -214,44 +213,6 @@ public class ObjRecognitionController {
 	}
 	
 	/**
-	 * change image width and height, call method to find circles in image
-	 * @param file
-	 *            input file selected png image
-	 * @return
-	 *            image with found circles
-	 */
-	private Image grabImg(File file) {
-		Mat frame = new Mat();
-		Image imageToShow = null;
-		
-		try {
-			String path = file.getAbsolutePath();
-			frame = Imgcodecs.imread(path);
-			
-			int originWidth = frame.width();
-			int originHeight = frame.height();
-			
-			if (originWidth > 640 && originHeight > 480){
-				if (originWidth > originHeight || originWidth == originHeight) {
-					Imgproc.resize(frame, frame, new Size(640, 640*originHeight/originWidth));
-				}
-				else if (originWidth < originHeight) {
-					Imgproc.resize(frame, frame, new Size(480*originWidth/originHeight, 480));
-				}
-			}
-			// find circles and show them
-			frame = this.findCircles(frame);
-			
-			// convert the Mat object (OpenCV) to Image (JavaFX)
-			imageToShow = mat2Image(frame);
-		} catch (Exception e) {
-			System.err.print("ERROR");
-			e.printStackTrace();
-		}
-		return imageToShow;
-	}
-	
-	/**
 	 * change frame width and height, call method to find circles in frame
 	 * @return
 	 *            frame with found circles
@@ -290,6 +251,44 @@ public class ObjRecognitionController {
 				System.err.print("ERROR");
 				e.printStackTrace();
 			}
+		}
+		return imageToShow;
+	}
+	
+	/**
+	 * change image width and height, call method to find circles in image
+	 * @param file
+	 *            input file selected png image
+	 * @return
+	 *            image with found circles
+	 */
+	private Image grabImg(File file) {
+		Mat frame = new Mat();
+		Image imageToShow = null;
+		
+		try {
+			String path = file.getAbsolutePath();
+			frame = Imgcodecs.imread(path);
+			
+			int originWidth = frame.width();
+			int originHeight = frame.height();
+			
+			if (originWidth > 640 && originHeight > 480){
+				if (originWidth > originHeight || originWidth == originHeight) {
+					Imgproc.resize(frame, frame, new Size(640, 640*originHeight/originWidth));
+				}
+				else if (originWidth < originHeight) {
+					Imgproc.resize(frame, frame, new Size(480*originWidth/originHeight, 480));
+				}
+			}
+			// find circles and show them
+			frame = this.findCircles(frame);
+			
+			// convert the Mat object (OpenCV) to Image (JavaFX)
+			imageToShow = mat2Image(frame);
+		} catch (Exception e) {
+			System.err.print("ERROR");
+			e.printStackTrace();
 		}
 		return imageToShow;
 	}
@@ -425,10 +424,8 @@ public class ObjRecognitionController {
 	 */
 	private <T> void onFXThread(final ObjectProperty<T> property, final T value) {
 		Platform.runLater(new Runnable() {
-			
 			@Override
-			public void run()
-			{
+			public void run() {
 				property.set(value);
 			}
 		});
