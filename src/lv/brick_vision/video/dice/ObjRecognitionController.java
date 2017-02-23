@@ -54,8 +54,6 @@ public class ObjRecognitionController {
 	// FXML slider for parameters
 	
 	@FXML
-	private Slider erodeSlider;
-	@FXML
 	private Slider dilateSlider;
 	@FXML
 	private Slider dpSlider;
@@ -71,8 +69,6 @@ public class ObjRecognitionController {
 	@FXML
 	private Label parameterValues;
 	@FXML
-	private Label radiusValues;
-	@FXML
 	private Label resultValue;
 	
 	// a timer for acquiring the video stream
@@ -85,7 +81,6 @@ public class ObjRecognitionController {
 	
 	// property for object binding
 	private ObjectProperty<String> parameterValuesProp;
-	private ObjectProperty<String> radiusValuesProp;
 	private ObjectProperty<String> resultValueProp;
 		
 	/**
@@ -95,10 +90,8 @@ public class ObjRecognitionController {
 	private void startCamera() {
 		// bind a text property with the string containing the current properties
 		parameterValuesProp = new SimpleObjectProperty<>();
-		radiusValuesProp = new SimpleObjectProperty<>();
 		resultValueProp = new SimpleObjectProperty<>();
 		this.parameterValues.textProperty().bind(parameterValuesProp);
-		this.radiusValues.textProperty().bind(radiusValuesProp);
 		this.resultValue.textProperty().bind(resultValueProp);
 				
 		// set a fixed width for all the image to show and preserve image ratio
@@ -160,10 +153,8 @@ public class ObjRecognitionController {
 	private void selectImage() {
 		// bind a text property with the string containing the current properties
 		parameterValuesProp = new SimpleObjectProperty<>();
-		radiusValuesProp = new SimpleObjectProperty<>();
 		resultValueProp = new SimpleObjectProperty<>();
 		this.parameterValues.textProperty().bind(parameterValuesProp);
-		this.radiusValues.textProperty().bind(radiusValuesProp);
 		this.resultValue.textProperty().bind(resultValueProp);
 		
 		// set a fixed width for all the image to show and preserve image ratio
@@ -325,7 +316,6 @@ public class ObjRecognitionController {
 		Imgproc.medianBlur(gray, gray, 3);
 		
 		// morphological operators
-		double erodeElem = this.erodeSlider.getValue();
 		double dilateElem = this.dilateSlider.getValue();
 		// inverse ratio of the accumulator resolution to the image resolution
 		double dp = this.dpSlider.getValue();
@@ -342,18 +332,8 @@ public class ObjRecognitionController {
 		// find edges
 		Imgproc.Canny(gray, edges, lowThreshold, highThreshold);
 		
-		// dilate with large element, erode with small ones
-		Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(erodeElem, erodeElem));
+		// dilate canny image
 		Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(dilateElem, dilateElem));
-		
-		Imgproc.erode(edges, morph, erodeElement);
-		Imgproc.erode(edges, morph, erodeElement);
-		Imgproc.erode(edges, morph, erodeElement);
-		Imgproc.erode(edges, morph, erodeElement);
-		
-		Imgproc.dilate(edges, morph, dilateElement);
-		Imgproc.dilate(edges, morph, dilateElement);
-		Imgproc.dilate(edges, morph, dilateElement);
 		Imgproc.dilate(edges, morph, dilateElement);
 				
 		// display canny image
@@ -390,13 +370,11 @@ public class ObjRecognitionController {
 		}
 		
 		// display values
-		String valuesToPrint = "dp: " + String.format("%.1f", dp) + "\tmin Dist: " + String.format("%.1f", minDist) + 
-				"\terode: " + String.format("%.0f", erodeElem) + "\tdilate: " + String.format("%.0f", dilateElem) +
-				"\taccumulator: " + String.format("%.1f", accumulator);
-		String radiusToPrint = "min Radius: " + String.format("%.1f", minRadius) + "\tmax Radius: " + String.format("%.1f", maxRadius);
+		String valuesToPrint = "dilate: " + String.format("%.0f", dilateElem) + "\tdp: " + String.format("%.1f", dp) + 
+				"\tmin Dist: " + String.format("%.1f", minDist) + "\taccumulator: " + String.format("%.1f", accumulator) +
+				"\tmin Radius: " + String.format("%.1f", minRadius) + "\tmax Radius: " + String.format("%.1f", maxRadius);
 		String resultToPrint = "Result: " + String.format("%d", circlesList.size());
 		this.onFXThread(this.parameterValuesProp, valuesToPrint);
-		this.onFXThread(this.radiusValuesProp, radiusToPrint);
 		this.onFXThread(this.resultValueProp, resultToPrint);
 		
 		System.out.println("\t");
@@ -456,3 +434,5 @@ public class ObjRecognitionController {
 		});
 	}
 }
+
+
