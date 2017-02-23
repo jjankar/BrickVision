@@ -69,7 +69,21 @@ public class ImgToolsTest {
 		        mat1.put(row, col, intArray1[row][col]);
 		}
 		mat = tools.removeBackGround(mat, mat1);
-		
+		double [] d = mat.get(0, 0);
+		int i = (int) d[0];
+		assertEquals(2, i);
+		//-----------------------------------------------
+		d = mat.get(1, 0);
+		i = (int) d[0];
+		assertEquals(-2, i);
+		//-----------------------------------------------
+		d = mat.get(0, 1);
+		i = (int) d[0];
+		assertEquals(1, i);
+		//-----------------------------------------------
+		d = mat.get(1, 1);
+		i = (int) d[0];
+		assertEquals(-1, i);
 		
 	}
 
