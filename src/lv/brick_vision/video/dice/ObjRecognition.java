@@ -15,8 +15,8 @@ import javafx.fxml.FXMLLoader;
 * Use sliders to adjust the image or video for better results. Found circles are outlined and pip
 * count displayed.
 *
-* @author Original program author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>; Modified by Kaspars Bulindzs,
-*  Janis Karklins, Dmitrijs Ozerskis, Andrejs Paramonovs, Andrejs Derevjanko, Antons Kalcevs.  
+* @author Original program author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>; Modified by 
+* Kaspars Bulindzs, Janis Karklins, Dmitrijs Ozerskis, Andrejs Paramonovs, Andrejs Derevjanko, Antons Kalcevs.  
 * @version 1.0 (2017-02-24)
 * @since 1.0 (2017-02-24)
 *
@@ -36,7 +36,7 @@ public class ObjRecognition extends Application {
 			Scene scene = new Scene(root, 800, 800);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			// create the stage with the given title and the previously created scene
-			primaryStage.setTitle("Object Recognition");
+			primaryStage.setTitle("Dice Counting");
 			primaryStage.setScene(scene);
 			// show the GUI
 			primaryStage.show();

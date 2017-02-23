@@ -1,6 +1,7 @@
 package lv.brick_vision.video.dice;
 
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Vector;
 import java.util.concurrent.Executors;
@@ -8,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -15,6 +17,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -24,26 +27,24 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
-import lv.brick_vision.video.Utils;
 
 /**
  * The application logic is implemented here. It handles the button for
  * starting/stopping the camera and button to use image, the acquired video stream or image, the relative
  * controls.
  *
- * @author Original program author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>; Modified by Kaspars Bulindzs,
- *  Janis Karklins, Dmitrijs Ozerskis, Andrejs Paramonovs, Andrejs Derevjanko, Antons Kalcevs.  
+ * @author Original program author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>; Modified by 
+ * Kaspars Bulindzs, Janis Karklins, Dmitrijs Ozerskis, Andrejs Paramonovs, Andrejs Derevjanko, Antons Kalcevs.  
  * @version 1.0 (2017-02-24)
  * @since 1.0 (2017-02-24)
  *
  */
 public class ObjRecognitionController {
-	
-	// camera and picture buttons
+	// camera and image buttons
 	@FXML
 	private Button cameraButton;
 	@FXML
-	private Button pictureButton;
+	private Button imageButton;
 	// the FXML area for showing the current frame
 	@FXML
 	private ImageView originalFrame;
@@ -52,13 +53,11 @@ public class ObjRecognitionController {
 	private ImageView cannyImage;
 	// FXML slider for parameters
 	@FXML
+	private Slider dilateSlider;
+	@FXML
 	private Slider dpSlider;
 	@FXML
 	private Slider minDistSlider;
-	@FXML
-	private Slider dilateSlider;
-	@FXML
-	private Slider erodeSlider;
 	@FXML
 	private Slider accumulatorSlider;
 	@FXML
@@ -69,8 +68,6 @@ public class ObjRecognitionController {
 	@FXML
 	private Label parameterValues;
 	@FXML
-	private Label radiusValues;
-	@FXML
 	private Label resultValue;
 	
 	// a timer for acquiring the video stream
@@ -79,11 +76,10 @@ public class ObjRecognitionController {
 	private VideoCapture capture = new VideoCapture();
 	// a flag to change the button behavior
 	private boolean cameraActive;
-	private boolean pictureActive;
+	private boolean imageActive;
 	
 	// property for object binding
 	private ObjectProperty<String> parameterValuesProp;
-	private ObjectProperty<String> radiusValuesProp;
 	private ObjectProperty<String> resultValueProp;
 		
 	/**
@@ -93,10 +89,8 @@ public class ObjRecognitionController {
 	private void startCamera() {
 		// bind a text property with the string containing the current properties
 		parameterValuesProp = new SimpleObjectProperty<>();
-		radiusValuesProp = new SimpleObjectProperty<>();
 		resultValueProp = new SimpleObjectProperty<>();
 		this.parameterValues.textProperty().bind(parameterValuesProp);
-		this.radiusValues.textProperty().bind(radiusValuesProp);
 		this.resultValue.textProperty().bind(resultValueProp);
 				
 		// set a fixed width for all the image to show and preserve image ratio
@@ -111,9 +105,6 @@ public class ObjRecognitionController {
 			if (this.capture.isOpened()) {
 				this.cameraActive = true;
 				
-				this.pictureActive = false;
-				this.pictureButton.setText("Select Picture");
-				
 				// grab a frame
 				Runnable frameGrabber = new Runnable() {
 					
@@ -124,7 +115,7 @@ public class ObjRecognitionController {
 					}
 				};
 				this.timer = Executors.newSingleThreadScheduledExecutor();
-				this.timer.scheduleAtFixedRate(frameGrabber, 0, 500, TimeUnit.MILLISECONDS);
+				this.timer.scheduleAtFixedRate(frameGrabber, 0, 200, TimeUnit.MILLISECONDS);
 				
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
@@ -147,7 +138,6 @@ public class ObjRecognitionController {
 				this.timer.awaitTermination(33, TimeUnit.MILLISECONDS);
 			}
 			catch (InterruptedException e) {
-				// log the exception
 				System.err.println("Exception in stopping the frame capture, trying to release the camera now... " + e);
 			}
 			// release the camera
@@ -156,51 +146,59 @@ public class ObjRecognitionController {
 	}
 	
 	/**
-	 * The action triggered by pushing the button "Select Picture" on the GUI
+	 * The action triggered by pushing the button "Select Image" on the GUI
 	 */	
 	@FXML
-	private void selectPicture() {
+	private void selectImage() {
 		// bind a text property with the string containing the current properties
 		parameterValuesProp = new SimpleObjectProperty<>();
-		radiusValuesProp = new SimpleObjectProperty<>();
 		resultValueProp = new SimpleObjectProperty<>();
 		this.parameterValues.textProperty().bind(parameterValuesProp);
-		this.radiusValues.textProperty().bind(radiusValuesProp);
 		this.resultValue.textProperty().bind(resultValueProp);
 		
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.originalFrame, 400);
 		this.imageViewProperties(this.cannyImage, 400);
 		
-		if (!this.pictureActive) {
-			this.pictureActive = true;
+		if (!this.imageActive) {
+			this.imageActive = true;
 			
 			FileChooser chooser = new FileChooser();
 			FileChooser.ExtensionFilter filterPNG = new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png");
 			chooser.getExtensionFilters().addAll(filterPNG);
 			final File file = chooser.showOpenDialog(null);
 			
-			// grab a frame
-			Runnable frameGrabber = new Runnable() {
+			if (!(file == null)) {
+				// grab a frame
+				Runnable frameGrabber = new Runnable() {
+					
+					@Override
+					public void run() {
+						Image imageToShow = grabImg(file);
+						originalFrame.setImage(imageToShow);
+					}
+				};
+				this.timer = Executors.newSingleThreadScheduledExecutor();
+				this.timer.scheduleAtFixedRate(frameGrabber, 0, 1000, TimeUnit.MILLISECONDS);
 				
-				@Override
-				public void run() {
-					Image imageToShow = grabImg(file);
-					originalFrame.setImage(imageToShow);
-				}
-			};
-			this.timer = Executors.newSingleThreadScheduledExecutor();
-			this.timer.scheduleAtFixedRate(frameGrabber, 0, 1000, TimeUnit.MILLISECONDS);
-			
-			// update the button content
-			this.pictureButton.setText("Pause");
+				// update the button content
+				this.imageButton.setText("Pause");
+			}
+			else if (file == null) {
+				// the camera is not active at this point
+				this.imageActive = false;
+				// update again the button content
+				this.imageButton.setText("Select Image");
+				this.timer.shutdown();
+				// release the camera
+				this.capture.release();
+			}
 		}
 		else {
 			// the camera is not active at this point
-			this.pictureActive = false;
+			this.imageActive = false;
 			// update again the button content
-			this.pictureButton.setText("Select Picture");
-			
+			this.imageButton.setText("Select Image");
 			// stop the timer
 			try {
 				this.timer.shutdown();
@@ -212,44 +210,6 @@ public class ObjRecognitionController {
 			// release the camera
 			this.capture.release();
 		}		
-	}
-	
-	/**
-	 * change image width and height, call method to find circles in image
-	 * @param file
-	 *            input file selected png image
-	 * @return
-	 *            image with found circles
-	 */
-	private Image grabImg(File file) {
-		Mat frame = new Mat();
-		Image imageToShow = null;
-		
-		try {
-			String path = file.getAbsolutePath();
-			frame = Imgcodecs.imread(path);
-			
-			int originWidth = frame.width();
-			int originHeight = frame.height();
-			
-			if (originWidth > 640 && originHeight > 480){
-				if (originWidth > originHeight || originWidth == originHeight) {
-					Imgproc.resize(frame, frame, new Size(640, 640*originHeight/originWidth));
-				}
-				else if (originWidth < originHeight) {
-					Imgproc.resize(frame, frame, new Size(480*originWidth/originHeight, 480));
-				}
-			}
-			// find circles and show them
-			frame = this.findCircles(frame);
-			
-			// convert the Mat object (OpenCV) to Image (JavaFX)
-			imageToShow = Utils.mat2Image(frame);
-		} catch (Exception e) {
-			System.err.print("ERROR");
-			e.printStackTrace();
-		}
-		return imageToShow;
 	}
 	
 	/**
@@ -284,7 +244,7 @@ public class ObjRecognitionController {
 					frame = this.findCircles(frame);
 					
 					// convert the Mat object (OpenCV) to Image (JavaFX)
-					imageToShow = Utils.mat2Image(frame);
+					imageToShow = mat2Image(frame);
 				}
 			}
 			catch (Exception e) {
@@ -296,11 +256,50 @@ public class ObjRecognitionController {
 	}
 	
 	/**
-	 * 
-	 * @param frame
-	 *            
+	 * change image width and height, call method to find circles in image
+	 * @param file
+	 *            input file selected png image
 	 * @return
-	 *            
+	 *            image with found circles
+	 */
+	private Image grabImg(File file) {
+		Mat frame = new Mat();
+		Image imageToShow = null;
+		
+		try {
+			String path = file.getAbsolutePath();
+			frame = Imgcodecs.imread(path);
+			
+			int originWidth = frame.width();
+			int originHeight = frame.height();
+			
+			if (originWidth > 640 && originHeight > 480){
+				if (originWidth > originHeight || originWidth == originHeight) {
+					Imgproc.resize(frame, frame, new Size(640, 640*originHeight/originWidth));
+				}
+				else if (originWidth < originHeight) {
+					Imgproc.resize(frame, frame, new Size(480*originWidth/originHeight, 480));
+				}
+			}
+			// find circles and show them
+			frame = this.findCircles(frame);
+			
+			// convert the Mat object (OpenCV) to Image (JavaFX)
+			imageToShow = mat2Image(frame);
+		} catch (Exception e) {
+			System.err.print("ERROR");
+			e.printStackTrace();
+		}
+		return imageToShow;
+	}
+	
+	/**
+	 * method controls parameters with GUI sliders; finds circles after given parameters,
+	 * count all found circles and draw them on the original frame/image
+	 * @param frame
+	 *            frame/image to analyze
+	 * @return
+	 *            original frame/image with drawn circles
 	 */
 	private Mat findCircles(Mat frame) {
 		Mat gray = new Mat();
@@ -315,14 +314,12 @@ public class ObjRecognitionController {
 		Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
 		Imgproc.medianBlur(gray, gray, 3);
 		
+		// morphological operators
+		double dilateElem = this.dilateSlider.getValue();
 		// inverse ratio of the accumulator resolution to the image resolution
 		double dp = this.dpSlider.getValue();
 		// min distance between circle centers
 		double minDist = this.minDistSlider.getValue();
-		// separate out regions of an image corresponding to objects which we want to analyze
-		// based on the variation of intensity between object and background pixels
-		double dilateElem = this.dilateSlider.getValue();
-		double erodeElem = this.erodeSlider.getValue();
 		// threshold for the circle centers at the detection stage
 		double accumulator = this.accumulatorSlider.getValue();		
 		// min/max Radius
@@ -334,23 +331,12 @@ public class ObjRecognitionController {
 		// find edges
 		Imgproc.Canny(gray, edges, lowThreshold, highThreshold);
 		
-		// morphological operators, dilate with large element, erode with small ones
+		// dilate canny image
 		Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(dilateElem, dilateElem));
-		Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(erodeElem, erodeElem));
-		
-		Imgproc.erode(edges, morph, erodeElement);
-		Imgproc.erode(edges, morph, erodeElement);
-		Imgproc.erode(edges, morph, erodeElement);
-		Imgproc.erode(edges, morph, erodeElement);
-		
 		Imgproc.dilate(edges, morph, dilateElement);
-		Imgproc.dilate(edges, morph, dilateElement);
-		Imgproc.dilate(edges, morph, dilateElement);
-		Imgproc.dilate(edges, morph, dilateElement);
-		
-		
+				
 		// display canny image
-		Utils.onFXThread(this.cannyImage.imageProperty(), Utils.mat2Image(morph));
+		this.onFXThread(this.cannyImage.imageProperty(), this.mat2Image(morph));
 		
 		// find circles
 		Imgproc.HoughCircles(morph, circles, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, 255, accumulator,
@@ -383,14 +369,12 @@ public class ObjRecognitionController {
 		}
 		
 		// display values
-		String valuesToPrint = "dp: " + String.format("%.1f", dp) + "\tmin Dist: " + String.format("%.1f", minDist) + 
-				"\tdilate: " + String.format("%.0f", dilateElem) + "\terode: " + 
-				String.format("%.0f", erodeElem) + "\taccumulator: " + String.format("%.1f", accumulator);
-		String radiusToPrint = "min Radius: " + String.format("%.1f", minRadius) + "\tmax Radius: " + String.format("%.1f", maxRadius);
+		String valuesToPrint = "dilate: " + String.format("%.0f", dilateElem) + "\tdp: " + String.format("%.1f", dp) + 
+				"\tmin Dist: " + String.format("%.1f", minDist) + "\taccumulator: " + String.format("%.1f", accumulator) +
+				"\tmin Radius: " + String.format("%.1f", minRadius) + "\tmax Radius: " + String.format("%.1f", maxRadius);
 		String resultToPrint = "Result: " + String.format("%d", circlesList.size());
-		Utils.onFXThread(this.parameterValuesProp, valuesToPrint);
-		Utils.onFXThread(this.radiusValuesProp, radiusToPrint);
-		Utils.onFXThread(this.resultValueProp, resultToPrint);
+		this.onFXThread(this.parameterValuesProp, valuesToPrint);
+		this.onFXThread(this.resultValueProp, resultToPrint);
 		
 		System.out.println("\t");
 		return frame;
@@ -412,4 +396,40 @@ public class ObjRecognitionController {
 		image.setPreserveRatio(true);
 	}
 	
+	/**
+	 * Convert a {@link Mat} object (OpenCV) in the corresponding {@link Image}
+	 * for JavaFX
+	 * 
+	 * @param frame
+	 *            the {@link Mat} representing the current frame
+	 * @return the {@link Image} to show
+	 */
+	private Image mat2Image(Mat frame) {
+		// create a temporary buffer
+		MatOfByte buffer = new MatOfByte();
+		// encode the frame in the buffer, according to the PNG format
+		Imgcodecs.imencode(".png", frame, buffer);
+		// build and return an Image created from the image encoded in the buffer
+		return new Image(new ByteArrayInputStream(buffer.toArray()));
+	}
+	
+	/**
+	 * Generic method for putting element running on a non-JavaFX thread on the
+	 * JavaFX thread, to properly update the UI
+	 * 
+	 * @param property
+	 *            a {@link ObjectProperty}
+	 * @param value
+	 *            the value to set for the given {@link ObjectProperty}
+	 */
+	private <T> void onFXThread(final ObjectProperty<T> property, final T value) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				property.set(value);
+			}
+		});
+	}
 }
+
+
