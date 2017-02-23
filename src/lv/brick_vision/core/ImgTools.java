@@ -1,4 +1,4 @@
-package lv.brick_vision;
+package lv.brick_vision.core;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;

@@ -16,6 +16,8 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import lv.brick_vision.core.ImgTools;
+
 public class RunApp {
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
