@@ -1,4 +1,4 @@
-package janis.video;
+package lv.brick_vision.video.cadr;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -12,13 +12,14 @@ import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-import janis.video.utils.Utils;
+
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import lv.brick_vision.video.Utils;
 
 /**
  * The controller for our application, where the application logic is

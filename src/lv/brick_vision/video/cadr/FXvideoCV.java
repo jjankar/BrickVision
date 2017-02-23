@@ -1,4 +1,4 @@
-package janis.video;
+package lv.brick_vision.video.cadr;
 import org.opencv.core.Core;
 
 import javafx.application.Application;
