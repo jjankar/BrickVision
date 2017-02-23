@@ -1,0 +1,8 @@
+Project made in Eclipse(Neon.2).
+This application counts pips on dice using "findCircles" method.
+Use sliders to adjust the image or video for precise results. Found circles are outlined and pip
+count displayed. Some screenshots available at "screenshots" folder.
+
+Please, note that the project is an Eclipse project, made for teaching purposes. Before using it,
+you need to install the OpenCV library (version 3.0) and JavaFX (version 2 or superior) and create
+a User Library named opencv that links to the OpenCV jar and native libraries.
