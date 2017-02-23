@@ -57,9 +57,9 @@ public class ObjRecognitionController {
 	@FXML
 	private Slider minDistSlider;
 	@FXML
-	private Slider lowThresholdSlider;
+	private Slider dilateSlider;
 	@FXML
-	private Slider highThresholdSlider;
+	private Slider erodeSlider;
 	@FXML
 	private Slider accumulatorSlider;
 	@FXML
@@ -322,20 +322,22 @@ public class ObjRecognitionController {
 		double minDist = this.minDistSlider.getValue();
 		// separate out regions of an image corresponding to objects which we want to analyze
 		// based on the variation of intensity between object and background pixels
-		double lowThreshold = this.lowThresholdSlider.getValue();
-		double highThreshold = this.highThresholdSlider.getValue();
+		double dilateElem = this.dilateSlider.getValue();
+		double erodeElem = this.erodeSlider.getValue();
 		// threshold for the circle centers at the detection stage
 		double accumulator = this.accumulatorSlider.getValue();		
 		// min/max Radius
 		double minRadius = this.minRadiusSlider.getValue();
 		double maxRadius = this.maxRadiusSlider.getValue();
 		
+		double lowThreshold = 240;
+		double highThreshold = 255;
 		// find edges
 		Imgproc.Canny(gray, edges, lowThreshold, highThreshold);
 		
 		// morphological operators, dilate with large element, erode with small ones
-		Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(4, 4));
-		Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(1, 1));
+		Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(dilateElem, dilateElem));
+		Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(erodeElem, erodeElem));
 		
 		Imgproc.erode(edges, morph, erodeElement);
 		Imgproc.erode(edges, morph, erodeElement);
@@ -382,10 +384,10 @@ public class ObjRecognitionController {
 		}
 		
 		// display values
-		String valuesToPrint = "dp: " + String.format("%.2f", dp) + "\tmin Dist: " + String.format("%.2f", minDist) + 
-				"\tlow Threshold: " + String.format("%.2f", lowThreshold) + "\thigh Threshold: " + 
-				String.format("%.2f", highThreshold) + "\taccumulator: " + String.format("%.2f", accumulator);
-		String radiusToPrint = "min Radius: " + String.format("%.2f", minRadius) + "\tmax Radius: " + String.format("%.2f", maxRadius);
+		String valuesToPrint = "dp: " + String.format("%.1f", dp) + "\tmin Dist: " + String.format("%.1f", minDist) + 
+				"\tdilate: " + String.format("%.0f", dilateElem) + "\terode: " + 
+				String.format("%.0f", erodeElem) + "\taccumulator: " + String.format("%.1f", accumulator);
+		String radiusToPrint = "min Radius: " + String.format("%.1f", minRadius) + "\tmax Radius: " + String.format("%.1f", maxRadius);
 		String resultToPrint = "Result: " + String.format("%d", circlesList.size());
 		this.onFXThread(this.parameterValuesProp, valuesToPrint);
 		this.onFXThread(this.radiusValuesProp, radiusToPrint);
